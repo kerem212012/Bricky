@@ -1,11 +1,11 @@
 import uuid
 
-from django.core.validators import MinValueValidator
 from django.db import models
-from decimal import Decimal
-
 
 class Category(models.Model):
+    """
+    Model representing a product category
+    """
     id: uuid.UUID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     picture = models.ImageField(blank=True, upload_to="user_pictures", default="user_pictures/default.png")
     title: str= models.CharField(max_length=200,unique=True,db_index=True)
@@ -23,36 +23,35 @@ class Category(models.Model):
         ]
 class Product(models.Model):
     id: uuid.UUID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title:str = models.CharField(
-        max_length=50,
-        db_index=True,
-        unique=True
-    )
-    picture = models.ImageField()
-    description:str = models.TextField(
-        blank=True,
-        max_length=300,
-    )
-    price:Decimal = models.DecimalField(
-        max_digits=8,
-        decimal_places=2,
-        validators=[MinValueValidator(0)]
-    )
+    name: str = models.CharField(max_length=255, db_index=True)
+    slug: str = models.SlugField(unique=True, db_index=True)
+    description: str = models.TextField(blank=True)
+    picture = models.ImageField(blank=True, upload_to="products", default="products/default.png")
+    price: float = models.DecimalField(max_digits=10, decimal_places=2)
+    stock: int = models.PositiveIntegerField(default=0)
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
         related_name="products"
     )
-    slug: str = models.SlugField(unique=True, db_index=True)
+    is_active: bool = models.BooleanField(default=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return self.title
+        return self.name
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('store:product_detail', kwargs={'slug': self.slug})
 
     class Meta:
         verbose_name = 'Product'
         verbose_name_plural = 'Products'
         indexes = [
             models.Index(fields=["slug"]),
-            models.Index(fields=["title"])
+            models.Index(fields=["name"]),
+            models.Index(fields=["category"]),
+            models.Index(fields=["is_active"]),
         ]
-
+        ordering = ['-created_at']

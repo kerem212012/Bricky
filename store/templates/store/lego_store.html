@@ -1,0 +1,381 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bricky | LEGO Store - Build & Create</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'store/css/lego.css' %}">
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <span class="promo-text">Free Shipping on Orders Over $50</span>
+            <div class="top-links">
+                <a href="/admin">Account</a>
+                <span class="separator">|</span>
+                <a href="#help">Help</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <span class="brand-name">BRICKY</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Shop</a></li>
+                <li><a href="#categories">Categories</a></li>
+                <li><a href="#new">New Releases</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+            <div class="nav-right">
+                <a href="#search" class="search-btn">
+                    <i class="fas fa-search"></i>
+                </a>
+                <a href="#cart" class="cart-btn">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count">0</span>
+                </a>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Banner -->
+    <section class="hero">
+        <div class="hero-image">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>Build Your World</h1>
+                <p>Discover Premium LEGO Sets for Every Age</p>
+                <a href="#products" class="cta-button">Shop Now</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter & Search Bar -->
+    <section class="filter-bar">
+        <div class="container">
+            <form method="get" class="filter-controls">
+                <div class="search-wrapper">
+                    <input 
+                        type="text" 
+                        name="search" 
+                        placeholder="Search sets, themes, characters..."
+                        value="{{ search_query }}"
+                        class="search-input"
+                    >
+                    <i class="fas fa-search"></i>
+                </div>
+
+                <div class="filters-group">
+                    <select name="category" id="category" class="filter-select">
+                        <option value="">All Categories</option>
+                        {% for category in categories %}
+                        <option value="{{ category.slug }}" {% if selected_category == category.slug %}selected{% endif %}>
+                            {{ category.title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+
+                    <div class="price-range">
+                        <input 
+                            type="number" 
+                            name="min_price" 
+                            placeholder="Min"
+                            value="{{ min_price }}"
+                            class="price-input"
+                        >
+                        <span>—</span>
+                        <input 
+                            type="number" 
+                            name="max_price" 
+                            placeholder="Max"
+                            value="{{ max_price }}"
+                            class="price-input"
+                        >
+                    </div>
+
+                    <select name="sort" id="sort" class="filter-select">
+                        <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>Latest</option>
+                        <option value="price" {% if sort == 'price' %}selected{% endif %}>Price: Low to High</option>
+                        <option value="-price" {% if sort == '-price' %}selected{% endif %}>Price: High to Low</option>
+                        <option value="name" {% if sort == 'name' %}selected{% endif %}>Alphabetical</option>
+                    </select>
+
+                    <button type="submit" class="apply-btn">Apply</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products-section" id="products">
+        <div class="container">
+            <div class="products-header">
+                <h2>Our Collection</h2>
+                {% if search_query %}
+                <p>Search results for "{{ search_query }}"</p>
+                {% endif %}
+            </div>
+
+            {% if products %}
+            <div class="products-grid">
+                {% for product in products %}
+                <a href="{{ product.get_absolute_url }}" class="product-card">
+                    <div class="product-image">
+                        {% if product.picture %}
+                            <img src="{{ product.picture.url }}" alt="{{ product.name }}" loading="lazy">
+                        {% else %}
+                            <div class="image-placeholder">
+                                <i class="fas fa-cube"></i>
+                            </div>
+                        {% endif %}
+                        <div class="product-badge">
+                            {% if product.stock > 10 %}
+                                <span class="in-stock">In Stock</span>
+                            {% elif product.stock > 0 %}
+                                <span class="limited">Limited Stock</span>
+                            {% else %}
+                                <span class="out-stock">Out of Stock</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="product-content">
+                        <p class="product-category">{{ product.category.title }}</p>
+                        <h3 class="product-name">{{ product.name }}</h3>
+                        <p class="product-price">${{ product.price }}</p>
+                        
+                        <div class="product-actions">
+                            {% if product.stock > 0 %}
+                            <button class="btn-primary" onclick="event.preventDefault(); addToCart('{{ product.id }}', '{{ product.name }}')">
+                                Add to Bag
+                            </button>
+                            {% else %}
+                            <button class="btn-secondary" onclick="event.preventDefault(); notifyMe('{{ product.id }}')">
+                                Notify Me
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="pagination">
+                <div class="pagination-controls">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1" class="page-btn">First</a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="page-btn">Previous</a>
+                    {% endif %}
+
+                    <div class="page-info">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </div>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="page-btn">Next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="page-btn">Last</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <h3>No products found</h3>
+                <p>Try adjusting your filters</p>
+                <a href="/" class="btn-primary">Clear Filters</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="categories-section" id="categories">
+        <div class="container">
+            <h2>Browse by Theme</h2>
+            
+            {% if categories %}
+            <div class="categories-grid">
+                {% for category in categories %}
+                <a href="?category={{ category.slug }}" class="category-card">
+                    {% if category.picture %}
+                        <img src="{{ category.picture.url }}" alt="{{ category.title }}">
+                    {% else %}
+                        <div class="category-placeholder">
+                            <i class="fas fa-box"></i>
+                        </div>
+                    {% endif %}
+                    <div class="category-info">
+                        <h3>{{ category.title }}</h3>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <div class="features-grid">
+                <div class="feature">
+                    <i class="fas fa-truck"></i>
+                    <h3>Free Shipping</h3>
+                    <p>On orders over $50</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-lock"></i>
+                    <h3>Secure Checkout</h3>
+                    <p>100% secure transactions</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-undo"></i>
+                    <h3>Easy Returns</h3>
+                    <p>30-day return policy</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-headset"></i>
+                    <h3>Expert Support</h3>
+                    <p>24/7 customer service</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section" id="about">
+        <div class="container">
+            <div class="about-wrapper">
+                <div class="about-text">
+                    <h2>About Bricky</h2>
+                    <p>We're dedicated to providing authentic LEGO sets and premium building experiences for enthusiasts of all ages.</p>
+                    <ul class="benefits-list">
+                        <li>Authentic LEGO products</li>
+                        <li>Competitive pricing</li>
+                        <li>Fast & reliable shipping</li>
+                        <li>Expert customer support</li>
+                        <li>Exclusive member benefits</li>
+                    </ul>
+                </div>
+                <div class="about-stats">
+                    <div class="stat">
+                        <div class="stat-number">10,000+</div>
+                        <p>Happy Customers</p>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">500+</div>
+                        <p>Products</p>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">99%</div>
+                        <p>Satisfaction</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter-section">
+        <div class="container">
+            <div class="newsletter-content">
+                <h2>Subscribe to Our Newsletter</h2>
+                <p>Get exclusive deals and early access to new products</p>
+                <form class="newsletter-form" onsubmit="handleNewsletter(event)">
+                    <input type="email" placeholder="Enter your email" required>
+                    <button type="submit" class="btn-primary">Subscribe</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>Shop</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="#products">All Products</a></li>
+                        <li><a href="#categories">Categories</a></li>
+                        <li><a href="#">New Releases</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Customer Service</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>About</h4>
+                    <ul>
+                        <li><a href="#">About Bricky</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Sustainability</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Connect</h4>
+                    <div class="social-links">
+                        <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Bricky LEGO Store. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Cookie Settings</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Shopping Cart Sidebar -->
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h3>Shopping Bag</h3>
+            <button class="close-cart" onclick="toggleCart()">✕</button>
+        </div>
+        <div class="cart-items" id="cart-items">
+            <p class="empty-cart">Your bag is empty</p>
+        </div>
+        <div class="cart-footer">
+            <button class="btn-primary" onclick="checkout()">Checkout</button>
+        </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="back-to-top" onclick="backToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="{% static 'store/js/lego.js' %}"></script>
+</body>
+</html>
