@@ -61,21 +61,3 @@ class LegoStoreView(ListView):
             context['price_min'] = products.order_by('price').first().price
         
         return context
-
-
-class ProductDetailView(DetailView):
-    """
-    Individual product detail page
-    """
-    model = Product
-    template_name = 'store/product_detail.html'
-    context_object_name = 'product'
-    slug_field = 'slug'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['related_products'] = Product.objects.filter(
-            category=self.object.category,
-            is_active=True
-        ).exclude(id=self.object.id)[:4]
-        return context
