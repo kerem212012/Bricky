@@ -91,7 +91,7 @@ body {
 
 /* ===== NAVIGATION ===== */
 .navbar {
-    background: white;
+    background: #f9d649;
     padding: var(--spacing) 0;
     border-bottom: 1px solid var(--border);
     position: sticky;
@@ -111,7 +111,10 @@ body {
     font-size: 24px;
     font-weight: bold;
     color: var(--primary);
-    letter-spacing: 2px;
+    font-family: 'luckiest-guy', cursive;
+    letter-spacing: 1px;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .nav-links {
@@ -140,13 +143,13 @@ body {
     bottom: -4px;
     left: 0;
     width: 0;
-    height: 2px;
-    background: var(--primary);
+    height: 0;
+    background: transparent;
     transition: var(--transition);
 }
 
 .nav-links a:hover::after {
-    width: 100%;
+    width: 0;
 }
 
 .nav-right {
@@ -203,7 +206,6 @@ body {
 
 /* ===== HERO SECTION ===== */
 .hero {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     color: white;
     padding: 80px var(--spacing);
     text-align: center;
@@ -211,7 +213,7 @@ body {
 
 .hero-image {
     position: relative;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    background: rgb(53, 250, 53);
     min-height: 400px;
     display: flex;
     align-items: center;
@@ -571,6 +573,7 @@ body {
 
 .empty-state {
     text-align: center;
+    background: #ff3b45;
     padding: 60px var(--spacing);
 }
 
@@ -764,7 +767,7 @@ body {
 /* ===== NEWSLETTER SECTION ===== */
 .newsletter-section {
     padding: var(--spacing-lg) 0;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    background: #f9d649;
     color: white;
     text-align: center;
 }

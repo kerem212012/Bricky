@@ -72,7 +72,9 @@ class RegisterView(TemplateView):
             send_verification(request, user)
             login(request, user)
             return redirect('core:index')
-        return self.get(request, *args, **kwargs)
+        context = self.get_context_data(**kwargs)
+        context['form'] = form
+        return self.render_to_response(context)
 
 
 class ProfileView(LoginRequiredMixin, TemplateView):
@@ -118,18 +120,23 @@ def send_verification(request, user) -> Any:
     """
     Send email verification link to the user
     """
-    token = default_token_generator.make_token(user)
-    uid = urlsafe_base64_encode(force_bytes(user.pk))
-    domain = get_current_site(request).domain
-    link = reverse("users:verify_email", kwargs={"uidb64": uid, "token": token})
-    verify_url = f"http://{domain}{link}"
-    subject = "Email confirmation"
-    message = render_to_string("users/email_verify.html", {
-        "user": user,
-        "verify_url": verify_url,
-    })
+    try:
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        domain = get_current_site(request).domain
+        link = reverse("users:verify_email", kwargs={"uidb64": uid, "token": token})
+        verify_url = f"http://{domain}{link}"
+        subject = "Email confirmation"
+        message = render_to_string("users/email_verify.html", {
+            "user": user,
+            "verify_url": verify_url,
+        })
 
-    send_mail(subject, message, None, [user.email])
+        send_mail(subject, message, None, [user.email], html_message=message)
+    except Exception as e:
+        # Log the error but don't crash the registration
+        print(f"Email verification error: {str(e)}")
+        pass
 
 
 class EmailVerifyView(TemplateView):
