@@ -43,7 +43,7 @@ class Product(models.Model):
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return reverse('store:product_detail', kwargs={'slug': self.slug})
+        return reverse('core:product_detail', kwargs={'slug': self.slug})
 
     class Meta:
         verbose_name = 'Product'

@@ -66,3 +66,17 @@ class IndexView(ListView):
         
         return context
 
+
+class ProductDetailView(DetailView):
+    """
+    View for displaying a single product's details
+    """
+    model = Product
+    template_name = 'core/product_detail.html'
+    context_object_name = 'product'
+    slug_field = 'slug'
+    slug_url_kwarg = 'slug'
+    
+    def get_queryset(self):
+        return Product.objects.filter(is_active=True)
+
