@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Bricky | LEGO Store{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'img/lego-logo.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'img/lego-logo.png' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{% static 'store/css/lego.css' %}">
     {% block extra_css %}{% endblock %}
@@ -34,7 +36,9 @@
     <nav class="navbar">
         <div class="container">
             <div class="logo">
-                <a href="{% url 'core:index' %}" class="brand-name">BRICKY</a>
+                <a href="{% url 'core:index' %}" class="brand-logo">
+                    <img src="{% static 'img/lego-logo.png' %}" alt="Bricky LEGO Store" class="logo-img">
+                </a>
             </div>
             <ul class="nav-links">
                 <li><a href="{% url 'core:index' %}">Shop</a></li>
