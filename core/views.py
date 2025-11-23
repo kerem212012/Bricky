@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, TemplateView
 from django.db.models import Count, Sum, Q
 from django.utils import timezone
 from datetime import timedelta
@@ -80,3 +80,23 @@ class ProductDetailView(DetailView):
     def get_queryset(self):
         return Product.objects.filter(is_active=True)
 
+
+class PrivacyPolicyView(TemplateView):
+    """
+    View for displaying the Privacy Policy page
+    """
+    template_name = 'core/privacy_policy.html'
+
+
+class TermsOfServiceView(TemplateView):
+    """
+    View for displaying the Terms of Service page
+    """
+    template_name = 'core/terms_of_service.html'
+
+
+class CookieSettingsView(TemplateView):
+    """
+    View for displaying the Cookie Settings page
+    """
+    template_name = 'core/cookie_settings.html'

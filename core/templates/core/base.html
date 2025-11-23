@@ -72,45 +72,30 @@
                     <h3>Shop</h3>
                     <ul>
                         <li><a href="{% url 'core:index' %}">Home</a></li>
-                        <li><a href="#products">All Products</a></li>
+                        <li><a href="#products">Shop</a></li>
                         <li><a href="#categories">Categories</a></li>
                         <li><a href="#">New Releases</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3>Customer Service</h3>
-                    <ul>
-                        <li><a href="#">Help Center</a></li>
-                        <li><a href="#">Contact Us</a></li>
-                        <li><a href="#">Shipping Info</a></li>
-                        <li><a href="#">Returns</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
                     <h3>About</h3>
                     <ul>
                         <li><a href="#">About Bricky</a></li>
-                        <li><a href="#">Careers</a></li>
-                        <li><a href="#">Blog</a></li>
-                        <li><a href="#">Sustainability</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
                     <h3>Connect</h3>
                     <div class="social-links">
-                        <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
-                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="https://www.youtube.com/channel/UC8WEUnlETWORTIWI4jb339A" title="YouTube"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2025 Bricky LEGO Store. All rights reserved.</p>
                 <div class="footer-links">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                    <a href="#">Cookie Settings</a>
+                    <a href="{% url 'core:privacy_policy' %}">Privacy Policy</a>
+                    <a href="{% url 'core:terms_of_service' %}">Terms of Service</a>
+                    <a href="{% url 'core:cookie_settings' %}">Cookie Settings</a>
                 </div>
             </div>
         </div>

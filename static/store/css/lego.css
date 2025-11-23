@@ -213,7 +213,7 @@ body {
 
 .hero-image {
     position: relative;
-    background: rgb(53, 250, 53);
+    background-image: url("../lego-banner.png");
     min-height: 400px;
     display: flex;
     align-items: center;
@@ -1148,3 +1148,113 @@ body {
         right: 20px;
     }
 }
+
+/* ===== POLICY PAGES ===== */
+.policy-container {
+    background: white;
+    padding: var(--spacing-lg) 0;
+}
+
+.policy-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 var(--spacing);
+}
+
+.policy-content h1 {
+    font-size: 36px;
+    margin-bottom: var(--spacing);
+    color: var(--text-dark);
+    border-bottom: 3px solid var(--primary);
+    padding-bottom: var(--spacing);
+}
+
+.last-updated {
+    color: var(--text-light);
+    font-size: 14px;
+    margin-bottom: var(--spacing-lg);
+}
+
+.policy-section {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border);
+}
+
+.policy-section:last-child {
+    border-bottom: none;
+}
+
+.policy-section h2 {
+    font-size: 22px;
+    color: var(--primary);
+    margin-top: 0;
+    margin-bottom: var(--spacing-md);
+}
+
+.policy-section h3 {
+    font-size: 18px;
+    color: var(--text-dark);
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing);
+}
+
+.policy-section p {
+    color: var(--text-light);
+    line-height: 1.8;
+    margin-bottom: var(--spacing);
+}
+
+.policy-section ul,
+.policy-section ol {
+    color: var(--text-light);
+    line-height: 1.8;
+    margin: 0 0 var(--spacing) var(--spacing-md);
+    padding-left: var(--spacing-md);
+}
+
+.policy-section li {
+    margin-bottom: var(--spacing-sm);
+}
+
+.policy-section a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.policy-section a:hover {
+    text-decoration: underline;
+    color: #cc0005;
+}
+
+.contact-info {
+    background: var(--light);
+    padding: var(--spacing);
+    border-radius: 8px;
+    margin: var(--spacing) 0;
+}
+
+.contact-info p {
+    margin-bottom: var(--spacing-sm);
+}
+
+.contact-info p:last-child {
+    margin-bottom: 0;
+}
+
+.contact-info strong {
+    color: var(--primary);
+}
+
+/* ===== RESPONSIVE POLICY ===== */
+@media (max-width: 768px) {
+    .policy-content h1 {
+        font-size: 24px;
+    }
+    
+    .policy-section h2 {
+        font-size: 18px;
+    }
+}
+
