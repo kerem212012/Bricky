@@ -166,7 +166,7 @@
             {% if categories %}
             <div class="categories-grid">
                 {% for category in categories %}
-                <a href="?category={{ category.slug }}" class="category-card">
+                <a href="{% url 'core:category' category.slug %}" class="category-card">
                     {% if category.picture %}
                         <img src="{{ category.picture.url }}" alt="{{ category.title }}">
                     {% else %}

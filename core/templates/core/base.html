@@ -41,7 +41,8 @@
                 </a>
             </div>
             <ul class="nav-links">
-                <li><a href="{% url 'core:index' %}">Shop</a></li>
+                <li><a href="{% url 'core:index' %}">Home</a></li>
+                <li><a href="{% url 'core:shop' %}">Shop</a></li>
                 <li><a href="{% url 'core:index' %}#categories">Categories</a></li>
                 <li><a href="{% url 'core:new_releases' %}">New Releases</a></li>
                 <li><a href="{% url 'core:about' %}">About</a></li>
@@ -76,7 +77,7 @@
                     <h3>Shop</h3>
                     <ul>
                         <li><a href="{% url 'core:index' %}">Home</a></li>
-                        <li><a href="{% url 'core:index' %}#products">Shop</a></li>
+                        <li><a href="{% url 'core:shop' %}">Shop All Products</a></li>
                         <li><a href="{% url 'core:index' %}#categories">Categories</a></li>
                         <li><a href="{% url 'core:new_releases' %}">New Releases</a></li>
                     </ul>

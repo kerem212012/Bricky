@@ -11,6 +11,73 @@ from orders.models import Order, Customer
 from store.models import Product, Category
 
 
+class CategoryView(ListView):
+    """
+    Category detail page showing all products for a specific category with filtering
+    """
+    model = Product
+    template_name = 'core/category.html'
+    context_object_name = 'object_list'
+    paginate_by = 20
+
+    def get_queryset(self):
+        category_slug = self.kwargs.get('slug')
+        queryset = Product.objects.filter(
+            category__slug=category_slug, 
+            is_active=True
+        ).select_related('category')
+        
+        # Price filter
+        min_price = self.request.GET.get('min_price')
+        max_price = self.request.GET.get('max_price')
+        
+        if min_price:
+            queryset = queryset.filter(price__gte=min_price)
+        if max_price:
+            queryset = queryset.filter(price__lte=max_price)
+        
+        # Stock availability filter
+        in_stock = self.request.GET.get('in_stock')
+        if in_stock == 'true':
+            queryset = queryset.filter(stock__gt=0)
+        
+        # Sorting
+        sort = self.request.GET.get('sort', '-created_at')
+        queryset = queryset.order_by(sort)
+        
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        category_slug = self.kwargs.get('slug')
+        category = Category.objects.get(slug=category_slug)
+        
+        # Get filter values
+        min_price = self.request.GET.get('min_price', '')
+        max_price = self.request.GET.get('max_price', '')
+        in_stock = self.request.GET.get('in_stock', '')
+        sort = self.request.GET.get('sort', '-created_at')
+        
+        # Get products for stats
+        all_products = Product.objects.filter(category__slug=category_slug, is_active=True)
+        
+        context['category'] = category
+        context['min_price'] = min_price
+        context['max_price'] = max_price
+        context['in_stock'] = in_stock
+        context['sort'] = sort
+        context['products_count'] = all_products.count()
+        context['other_categories'] = Category.objects.exclude(slug=category_slug)[:6]
+        
+        # Get min price for stats
+        if all_products.exists():
+            context['min_price_stat'] = all_products.order_by('price').first().price
+        else:
+            context['min_price_stat'] = 0
+        
+        return context
+
+
 class IndexView(ListView):
     
     """
@@ -65,6 +132,62 @@ class IndexView(ListView):
         if products.exists():
             context['price_max'] = products.order_by('-price').first().price
             context['price_min'] = products.order_by('price').first().price
+        
+        return context
+
+
+class ShopView(ListView):
+    """
+    Dedicated shop page with advanced filtering and sorting
+    """
+    model = Product
+    template_name = 'core/shop.html'
+    context_object_name = 'object_list'
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = Product.objects.filter(is_active=True).select_related('category')
+        
+        # Category filter
+        categories = self.request.GET.getlist('category')
+        if categories:
+            queryset = queryset.filter(category__slug__in=categories)
+        
+        # Price filter
+        min_price = self.request.GET.get('min_price')
+        max_price = self.request.GET.get('max_price')
+        
+        if min_price:
+            queryset = queryset.filter(price__gte=min_price)
+        if max_price:
+            queryset = queryset.filter(price__lte=max_price)
+        
+        # Availability filter
+        availability = self.request.GET.get('availability')
+        if availability == 'in_stock':
+            queryset = queryset.filter(stock__gt=0)
+        
+        # Sorting
+        sort = self.request.GET.get('sort', '-created_at')
+        if sort == 'newest':
+            queryset = queryset.order_by('-created_at')
+        elif sort == 'price-low':
+            queryset = queryset.order_by('price')
+        elif sort == 'price-high':
+            queryset = queryset.order_by('-price')
+        elif sort == 'name':
+            queryset = queryset.order_by('name')
+        elif sort == 'popular':
+            queryset = queryset.order_by('-stock')
+        
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()
+        context['selected_categories'] = self.request.GET.getlist('category')
+        context['min_price'] = self.request.GET.get('min_price', '')
+        context['max_price'] = self.request.GET.get('max_price', '')
         
         return context
 

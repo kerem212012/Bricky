@@ -1,0 +1,965 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{{ category.title }} | Bricky LEGO Store{% endblock %}
+
+{% block content %}
+<div class="category-page-container">
+    <!-- Category Header -->
+    <section class="category-hero">
+        <div class="container">
+            <div class="category-hero-content">
+                {% if category.picture and category.picture.name %}
+                    <img src="{{ category.picture.url }}" alt="{{ category.title }}" class="category-hero-image">
+                {% else %}
+                    <div class="category-hero-placeholder">
+                        <i class="fas fa-cube"></i>
+                    </div>
+                {% endif %}
+                <div class="category-hero-text">
+                    <h1>{{ category.title }}</h1>
+                    <p class="category-breadcrumb">
+                        <a href="{% url 'core:index' %}">Home</a> / 
+                        <a href="{% url 'core:shop' %}">Shop</a> / 
+                        <span>{{ category.title }}</span>
+                    </p>
+                    <p class="category-description">
+                        Browse our complete collection of {{ category.title }} LEGO sets
+                    </p>
+                    <div class="category-stats">
+                        <div class="stat">
+                            <span class="stat-number">{{ products_count }}</span>
+                            <span class="stat-label">Products</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">${{ min_price|floatformat:2 }}</span>
+                            <span class="stat-label">From</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category Content -->
+    <div class="container category-main">
+        <div class="category-layout">
+            <!-- Sidebar Filters -->
+            <aside class="category-sidebar">
+                <div class="sidebar-header">
+                    <h3>Filters</h3>
+                    <a href="{% url 'core:category' category.slug %}" class="clear-filters">Clear</a>
+                </div>
+
+                <form method="get" class="category-filters">
+                    <!-- Price Range Filter -->
+                    <div class="filter-section">
+                        <h4>Price Range</h4>
+                        <div class="price-range-container">
+                            <input type="number" name="min_price" placeholder="Min" 
+                                value="{{ min_price }}" class="price-input">
+                            <span class="price-separator">-</span>
+                            <input type="number" name="max_price" placeholder="Max" 
+                                value="{{ max_price }}" class="price-input">
+                        </div>
+                    </div>
+
+                    <!-- Availability Filter -->
+                    <div class="filter-section">
+                        <h4>Availability</h4>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" name="in_stock" value="true" 
+                                {% if in_stock %}checked{% endif %}>
+                            <span>In Stock Only</span>
+                        </label>
+                    </div>
+
+                    <!-- Apply Button -->
+                    <button type="submit" class="btn-primary filter-apply">Apply Filters</button>
+                </form>
+            </aside>
+
+            <!-- Products Section -->
+            <div class="category-products">
+                <!-- Toolbar -->
+                <div class="products-toolbar">
+                    <div class="toolbar-left">
+                        <span class="products-count">
+                            Showing <strong>{{ page_obj.start_index|default:0 }}</strong>-<strong>{{ page_obj.end_index|default:object_list|length }}</strong> of <strong>{{ page_obj.paginator.count|default:object_list|length }}</strong>
+                        </span>
+                    </div>
+
+                    <div class="toolbar-right">
+                        <div class="view-mode">
+                            <button class="view-btn active" data-view="grid" title="Grid View">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button class="view-btn" data-view="list" title="List View">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+
+                        <select name="sort" class="sort-dropdown" onchange="updateSort(this.value)">
+                            <option value="">Sort By</option>
+                            <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+                            <option value="price-low" {% if sort == 'price-low' %}selected{% endif %}>Price: Low to High</option>
+                            <option value="price-high" {% if sort == 'price-high' %}selected{% endif %}>Price: High to Low</option>
+                            <option value="name" {% if sort == 'name' %}selected{% endif %}>Name: A-Z</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="products-grid grid-view" id="products-view">
+                    {% for product in object_list %}
+                    <a href="{{ product.get_absolute_url }}" class="product-item">
+                        <div class="product-image-container">
+                            {% if product.picture %}
+                                <img src="{{ product.picture.url }}" alt="{{ product.name }}" class="product-image">
+                            {% else %}
+                                <div class="product-image-placeholder">
+                                    <i class="fas fa-cube"></i>
+                                </div>
+                            {% endif %}
+                            <div class="product-overlay">
+                                <button class="btn-quick-view" onclick="return false;">Quick View</button>
+                            </div>
+                            {% if product.stock > 0 %}
+                                <span class="stock-badge in-stock">In Stock</span>
+                            {% else %}
+                                <span class="stock-badge out-stock">Out of Stock</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="product-details">
+                            <h3 class="product-title">{{ product.name }}</h3>
+                            <p class="product-desc">{{ product.description|truncatewords:12 }}</p>
+                            <div class="product-rating">
+                                <div class="stars">
+                                    {% for i in "12345" %}
+                                    <i class="fas fa-star"></i>
+                                    {% endfor %}
+                                </div>
+                                <span class="rating-count">({{ product.stock }} available)</span>
+                            </div>
+                            <div class="product-info">
+                                <span class="product-price">${{ product.price }}</span>
+                                <button class="btn-cart" onclick="addToCart(event, '{{ product.id }}')">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="no-products-message">
+                        <i class="fas fa-box-open"></i>
+                        <h3>No products found</h3>
+                        <p>Try adjusting your filters or <a href="{% url 'core:shop' %}">browse all products</a></p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                <div class="pagination-container">
+                    <div class="pagination">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1" class="page-link" title="First Page">
+                                <i class="fas fa-chevron-double-left"></i>
+                            </a>
+                            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">
+                                Previous
+                            </a>
+                        {% endif %}
+
+                        <div class="page-numbers">
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <span class="page-number active">{{ num }}</span>
+                                {% else %}
+                                    <a href="?page={{ num }}" class="page-number">{{ num }}</a>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}" class="page-link">
+                                Next
+                            </a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link" title="Last Page">
+                                <i class="fas fa-chevron-double-right"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                    <p class="page-info">
+                        Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Categories -->
+    <section class="related-categories">
+        <div class="container">
+            <h2>Explore Other Categories</h2>
+            <div class="categories-showcase">
+                {% for cat in other_categories %}
+                <a href="{% url 'core:category' cat.slug %}" class="category-link">
+                    {% if cat.picture and cat.picture.name %}
+                        <img src="{{ cat.picture.url }}" alt="{{ cat.title }}">
+                    {% else %}
+                        <div class="category-placeholder">
+                            <i class="fas fa-th"></i>
+                        </div>
+                    {% endif %}
+                    <span>{{ cat.title }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .category-page-container {
+        background: white;
+    }
+
+    /* Hero Section */
+    .category-hero {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        padding: var(--spacing-lg) 0;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .category-hero-content {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: var(--spacing-lg);
+        align-items: center;
+    }
+
+    .category-hero-image {
+        width: 100%;
+        max-width: 300px;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .category-hero-placeholder {
+        width: 100%;
+        max-width: 300px;
+        height: 300px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 80px;
+        opacity: 0.3;
+    }
+
+    .category-hero-text h1 {
+        font-size: 48px;
+        margin: 0 0 var(--spacing) 0;
+        font-weight: 700;
+    }
+
+    .category-breadcrumb {
+        margin: 0 0 var(--spacing) 0;
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    .category-breadcrumb a {
+        color: white;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .category-breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .category-description {
+        font-size: 18px;
+        margin-bottom: var(--spacing-lg);
+        opacity: 0.95;
+    }
+
+    .category-stats {
+        display: flex;
+        gap: var(--spacing-lg);
+    }
+
+    .stat {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .stat-number {
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Main Layout */
+    .category-main {
+        padding: var(--spacing-lg) 0;
+    }
+
+    .category-layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: var(--spacing-lg);
+    }
+
+    /* Sidebar */
+    .category-sidebar {
+        background: var(--light);
+        padding: var(--spacing-lg);
+        border-radius: 12px;
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+    }
+
+    .sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 2px solid var(--border);
+    }
+
+    .sidebar-header h3 {
+        margin: 0;
+        font-size: 18px;
+        color: var(--text-dark);
+    }
+
+    .clear-filters {
+        color: var(--primary);
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .clear-filters:hover {
+        text-decoration: underline;
+    }
+
+    .filter-section {
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .filter-section:last-child {
+        border-bottom: none;
+    }
+
+    .filter-section h4 {
+        margin: 0 0 var(--spacing) 0;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .price-range-container {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing);
+    }
+
+    .price-input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 2px solid var(--border);
+        border-radius: 6px;
+        font-size: 13px;
+    }
+
+    .price-input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .price-separator {
+        color: var(--text-light);
+    }
+
+    .filter-checkbox {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .filter-checkbox input {
+        width: 18px;
+        height: 18px;
+        margin-right: var(--spacing);
+        cursor: pointer;
+        accent-color: var(--primary);
+    }
+
+    .filter-checkbox span {
+        color: var(--text-dark);
+        font-size: 14px;
+    }
+
+    .filter-apply {
+        width: 100%;
+        margin-top: var(--spacing);
+    }
+
+    /* Products Section */
+    .category-products {
+        flex: 1;
+    }
+
+    .products-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-lg);
+        padding: var(--spacing-md);
+        background: var(--light);
+        border-radius: 8px;
+        flex-wrap: wrap;
+        gap: var(--spacing);
+    }
+
+    .products-count {
+        color: var(--text-light);
+        font-size: 14px;
+    }
+
+    .products-count strong {
+        color: var(--text-dark);
+    }
+
+    .toolbar-right {
+        display: flex;
+        gap: var(--spacing-md);
+        align-items: center;
+    }
+
+    .view-mode {
+        display: flex;
+        gap: 4px;
+        border: 2px solid var(--border);
+        border-radius: 6px;
+        padding: 4px;
+    }
+
+    .view-btn {
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        color: var(--text-light);
+        transition: var(--transition);
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .view-btn:hover,
+    .view-btn.active {
+        background: white;
+        color: var(--primary);
+    }
+
+    .sort-dropdown {
+        padding: 10px 12px;
+        border: 2px solid var(--border);
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        background: white;
+        transition: var(--transition);
+    }
+
+    .sort-dropdown:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    /* Products Grid */
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .products-grid.list-view {
+        grid-template-columns: 1fr;
+    }
+
+    .product-item {
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        text-decoration: none;
+        color: inherit;
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .list-view .product-item {
+        flex-direction: row;
+    }
+
+    .product-item:hover {
+        border-color: var(--primary);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-4px);
+    }
+
+    .product-image-container {
+        position: relative;
+        width: 100%;
+        height: 220px;
+        background: var(--light);
+        overflow: hidden;
+    }
+
+    .list-view .product-image-container {
+        width: 220px;
+        height: 220px;
+        flex-shrink: 0;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: var(--transition);
+    }
+
+    .product-item:hover .product-image {
+        transform: scale(1.05);
+    }
+
+    .product-image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        color: var(--border);
+    }
+
+    .product-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: var(--transition);
+    }
+
+    .product-item:hover .product-overlay {
+        opacity: 1;
+    }
+
+    .btn-quick-view {
+        padding: 10px 24px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+
+    .btn-quick-view:hover {
+        background: #cc0005;
+    }
+
+    .stock-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        z-index: 5;
+    }
+
+    .in-stock {
+        background: #4caf50;
+        color: white;
+    }
+
+    .out-stock {
+        background: #999;
+        color: white;
+    }
+
+    .product-details {
+        padding: var(--spacing-md);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .list-view .product-details {
+        padding: var(--spacing-lg);
+    }
+
+    .product-title {
+        margin: 0 0 var(--spacing-sm) 0;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 1.4;
+        color: var(--text-dark);
+    }
+
+    .product-desc {
+        margin: 0 0 var(--spacing) 0;
+        font-size: 13px;
+        color: var(--text-light);
+        line-height: 1.5;
+    }
+
+    .product-rating {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing);
+        font-size: 13px;
+    }
+
+    .stars {
+        color: #ffc107;
+        font-size: 12px;
+    }
+
+    .rating-count {
+        color: var(--text-light);
+    }
+
+    .product-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+    }
+
+    .product-price {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .btn-cart {
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        border: 2px solid var(--border);
+        background: white;
+        cursor: pointer;
+        transition: var(--transition);
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-cart:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .no-products-message {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: var(--spacing-lg);
+        color: var(--text-light);
+    }
+
+    .no-products-message i {
+        font-size: 64px;
+        display: block;
+        margin-bottom: var(--spacing);
+        opacity: 0.3;
+    }
+
+    .no-products-message h3 {
+        margin: 0 0 var(--spacing) 0;
+        color: var(--text-dark);
+    }
+
+    .no-products-message a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+
+    /* Pagination */
+    .pagination-container {
+        margin-top: var(--spacing-lg);
+        text-align: center;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: var(--spacing);
+        margin-bottom: var(--spacing-md);
+        flex-wrap: wrap;
+    }
+
+    .page-link {
+        padding: 10px 16px;
+        border: 2px solid var(--border);
+        background: white;
+        color: var(--text-dark);
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+    .page-link:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .page-numbers {
+        display: flex;
+        gap: var(--spacing-sm);
+    }
+
+    .page-number {
+        width: 36px;
+        height: 36px;
+        border: 2px solid var(--border);
+        background: white;
+        color: var(--text-dark);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+    .page-number:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .page-number.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .page-info {
+        color: var(--text-light);
+        font-size: 14px;
+        margin: 0;
+    }
+
+    /* Related Categories */
+    .related-categories {
+        background: var(--light);
+        padding: var(--spacing-lg) 0;
+        margin-top: var(--spacing-lg);
+    }
+
+    .related-categories h2 {
+        text-align: center;
+        margin-bottom: var(--spacing-lg);
+        font-size: 28px;
+    }
+
+    .categories-showcase {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-lg);
+    }
+
+    .category-link {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        height: 200px;
+        text-decoration: none;
+        color: white;
+        display: flex;
+        align-items: flex-end;
+        transition: var(--transition);
+    }
+
+    .category-link img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: var(--transition);
+    }
+
+    .category-placeholder {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        color: white;
+        opacity: 0.5;
+    }
+
+    .category-link:hover img {
+        transform: scale(1.05);
+    }
+
+    .category-link span {
+        position: relative;
+        z-index: 2;
+        background: linear-gradient(transparent, rgba(0,0,0,0.7));
+        width: 100%;
+        padding: var(--spacing-lg) var(--spacing);
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    @media (max-width: 1024px) {
+        .category-hero-content {
+            grid-template-columns: 1fr;
+        }
+
+        .category-hero-image,
+        .category-hero-placeholder {
+            max-width: none;
+        }
+
+        .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .category-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .category-sidebar {
+            position: relative;
+            top: 0;
+            background: white;
+            border: 2px solid var(--border);
+        }
+
+        .category-hero h1 {
+            font-size: 28px;
+        }
+
+        .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        }
+
+        .products-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .toolbar-right {
+            justify-content: space-between;
+        }
+
+        .sort-dropdown {
+            flex: 1;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .products-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing);
+        }
+
+        .product-details {
+            padding: var(--spacing-sm);
+        }
+
+        .page-numbers {
+            display: none;
+        }
+
+        .category-stats {
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+    }
+</style>
+
+<script>
+    function updateSort(value) {
+        if (value) {
+            const url = new URL(window.location);
+            url.searchParams.set('sort', value);
+            window.location.href = url.toString();
+        }
+    }
+
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const view = this.dataset.view;
+            const grid = document.getElementById('products-view');
+            
+            if (view === 'list') {
+                grid.classList.add('list-view');
+            } else {
+                grid.classList.remove('list-view');
+            }
+        });
+    });
+
+    function addToCart(e, productId) {
+        e.preventDefault();
+        alert('Product added to cart!');
+    }
+</script>
+{% endblock %}
