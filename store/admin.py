@@ -1,5 +1,5 @@
 from django.contrib import admin
-from store.models import Category, Product
+from store.models import Category, Product, Cart, CartItem
 
 
 @admin.register(Category)
@@ -34,3 +34,39 @@ class ProductAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+
+class CartItemInline(admin.TabularInline):
+    model = CartItem
+    extra = 0
+    readonly_fields = ['product', 'price', 'added_at', 'updated_at']
+    fields = ['product', 'quantity', 'price']
+
+
+@admin.register(Cart)
+class CartAdmin(admin.ModelAdmin):
+    list_display = ['user', 'get_total_items', 'get_total_price', 'created_at']
+    readonly_fields = ['created_at', 'updated_at']
+    search_fields = ['user__username', 'user__email']
+    inlines = [CartItemInline]
+
+    def get_total_items(self, obj):
+        return obj.get_total_items()
+    get_total_items.short_description = 'Items'
+
+    def get_total_price(self, obj):
+        return f'${obj.get_total_price()}'
+    get_total_price.short_description = 'Total Price'
+
+
+@admin.register(CartItem)
+class CartItemAdmin(admin.ModelAdmin):
+    list_display = ['product', 'cart', 'quantity', 'price', 'get_total_price', 'added_at']
+    list_filter = ['added_at', 'updated_at']
+    readonly_fields = ['added_at', 'updated_at']
+    search_fields = ['product__name', 'cart__user__username']
+
+    def get_total_price(self, obj):
+        return f'${obj.get_total_price()}'
+    get_total_price.short_description = 'Total'
+

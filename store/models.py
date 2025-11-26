@@ -1,6 +1,8 @@
 import uuid
 
 from django.db import models
+from decimal import Decimal
+from users.models import CustomUser
 
 class Category(models.Model):
     """
@@ -55,3 +57,70 @@ class Product(models.Model):
             models.Index(fields=["is_active"]),
         ]
         ordering = ['-created_at']
+
+
+class Cart(models.Model):
+    """
+    Model representing a shopping cart for a user
+    """
+    id: uuid.UUID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="cart"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"Cart for {self.user.username}"
+
+    def get_total_price(self) -> Decimal:
+        """Calculate total cart value"""
+        return sum(item.get_total_price() for item in self.items.all())
+
+    def get_total_items(self) -> int:
+        """Get total number of items in cart"""
+        return sum(item.quantity for item in self.items.all())
+
+    class Meta:
+        verbose_name = 'Cart'
+        verbose_name_plural = 'Carts'
+
+
+class CartItem(models.Model):
+    """
+    Model representing individual items in a cart
+    """
+    id: uuid.UUID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    cart = models.ForeignKey(
+        Cart,
+        on_delete=models.CASCADE,
+        related_name="items"
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="cart_items"
+    )
+    quantity: int = models.PositiveIntegerField(default=1)
+    price: Decimal = models.DecimalField(max_digits=10, decimal_places=2)
+    added_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"{self.quantity}x {self.product.name}"
+
+    def get_total_price(self) -> Decimal:
+        """Calculate total price for this item"""
+        return self.price * self.quantity
+
+    class Meta:
+        verbose_name = 'Cart Item'
+        verbose_name_plural = 'Cart Items'
+        unique_together = ('cart', 'product')
+        indexes = [
+            models.Index(fields=["cart"]),
+            models.Index(fields=["product"]),
+        ]
+

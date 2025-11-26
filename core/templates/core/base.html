@@ -54,9 +54,9 @@
                 <a href="#search" class="search-btn" onclick="openSearchModal(event)">
                     <i class="fas fa-search"></i>
                 </a>
-                <a href="#cart" class="cart-btn">
+                <a href="{% url 'core:cart' %}" class="cart-btn">
                     <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count">0</span>
+                    <span class="cart-count">{% if user.is_authenticated and user.cart %}{{ user.cart.get_total_items }}{% else %}0{% endif %}</span>
                 </a>
             </div>
             <div class="hamburger">

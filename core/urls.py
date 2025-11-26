@@ -16,6 +16,18 @@ urlpatterns = [
     path('terms-of-service/', views.TermsOfServiceView.as_view(), name='terms_of_service'),
     path('cookie-settings/', views.CookieSettingsView.as_view(), name='cookie_settings'),
     path('search/', views.SearchView.as_view(), name='search'),
+    
+    # Cart & Checkout URLs
+    path('cart/', views.CartView.as_view(), name='cart'),
+    path('cart/add/', views.AddToCartView.as_view(), name='add_to_cart'),
+    path('cart/remove/', views.RemoveFromCartView.as_view(), name='remove_from_cart'),
+    path('cart/update/', views.UpdateCartItemView.as_view(), name='update_cart'),
+    path('cart/clear/', views.ClearCartView.as_view(), name='clear_cart'),
+    path('checkout/', views.CheckoutView.as_view(), name='checkout'),
+    path('order/place/', views.PlaceOrderView.as_view(), name='place_order'),
+    path('order/<uuid:order_id>/confirmation/', views.OrderConfirmationView.as_view(), name='order_confirmation'),
+    
+    # API URLs
     path('api/search/', views.search_api, name='search_api'),
     path('api/autocomplete/', views.search_autocomplete, name='search_autocomplete'),
 ]

@@ -1,0 +1,732 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Order Confirmation | Bricky LEGO Store{% endblock %}
+
+{% block content %}
+<div class="confirmation-page-container">
+    <!-- Success Header -->
+    <section class="success-header">
+        <div class="container">
+            <div class="success-content">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h1>Order Confirmed!</h1>
+                <p>Thank you for your purchase. Your order has been received and is being prepared.</p>
+                <div class="order-number">
+                    Order #<span>{{ order.id }}</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Confirmation Content -->
+    <div class="container confirmation-main">
+        <div class="confirmation-layout">
+            <!-- Order Details -->
+            <div class="order-details-section">
+                <!-- Order Status -->
+                <div class="status-card">
+                    <h3>Order Status</h3>
+                    <div class="status-timeline">
+                        <div class="timeline-item completed">
+                            <div class="timeline-marker">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h4>Order Placed</h4>
+                                <p>{{ order.created_at|date:"F j, Y" }}</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h4>Processing</h4>
+                                <p>Your order is being prepared</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h4>Shipped</h4>
+                                <p>In transit to your address</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h4>Delivered</h4>
+                                <p>Expected by {{ order.created_at|date:"F j, Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="items-card">
+                    <h3>Order Items</h3>
+                    <div class="order-items-list">
+                        {% for item in order_items %}
+                        <div class="order-item">
+                            <div class="item-image">
+                                {% if item.product.picture %}
+                                    <img src="{{ item.product.picture.url }}" alt="{{ item.product.name }}">
+                                {% else %}
+                                    <div class="image-placeholder">
+                                        <i class="fas fa-cube"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="item-info">
+                                <h4>{{ item.product.name }}</h4>
+                                <p class="category">{{ item.product.category.title }}</p>
+                                <p class="sku">SKU: {{ item.product.id|truncatechars:8 }}</p>
+                            </div>
+                            <div class="item-details">
+                                <span class="qty">Qty: {{ item.quantity }}</span>
+                                <span class="price">${{ item.price }}</span>
+                            </div>
+                            <div class="item-total">${{ item.get_total_price }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="items-divider"></div>
+
+                    <div class="order-totals">
+                        <div class="total-row">
+                            <span>Subtotal</span>
+                            <span>${{ order.total_price|add:"-10" }}</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Shipping</span>
+                            <span>{{ shipping_cost }}</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Tax</span>
+                            <span>{{ tax }}</span>
+                        </div>
+                        <div class="total-row grand-total">
+                            <span>Order Total</span>
+                            <span>${{ order.total_price }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Address -->
+                <div class="address-card">
+                    <h3>Shipping Address</h3>
+                    <div class="address-content">
+                        <p>
+                            <strong>{{ order.customer.user.get_full_name }}</strong><br>
+                            {{ order.customer.address }}<br>
+                            {{ order.customer.phone }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Actions -->
+            <aside class="confirmation-sidebar">
+                <!-- Quick Actions -->
+                <div class="actions-card">
+                    <h3>What's Next?</h3>
+                    <div class="actions-list">
+                        <a href="{% url 'users:profile' %}" class="action-item">
+                            <i class="fas fa-user-circle"></i>
+                            <span>View Account</span>
+                        </a>
+                        <a href="{% url 'core:shop' %}" class="action-item">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>Continue Shopping</span>
+                        </a>
+                        <a href="#" class="action-item" onclick="window.print()">
+                            <i class="fas fa-print"></i>
+                            <span>Print Receipt</span>
+                        </a>
+                        <a href="{% url 'core:contact' %}" class="action-item">
+                            <i class="fas fa-headset"></i>
+                            <span>Contact Support</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Customer Service -->
+                <div class="service-card">
+                    <h3>Need Help?</h3>
+                    <p>Our customer service team is available 24/7 to assist you with any questions about your order.</p>
+                    <div class="contact-methods">
+                        <a href="tel:+1234567890" class="contact-link">
+                            <i class="fas fa-phone"></i> Call Us
+                        </a>
+                        <a href="mailto:support@bricky.com" class="contact-link">
+                            <i class="fas fa-envelope"></i> Email
+                        </a>
+                        <a href="#" class="contact-link">
+                            <i class="fas fa-comments"></i> Chat
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Confirmation Email -->
+                <div class="email-card">
+                    <i class="fas fa-envelope"></i>
+                    <p>A confirmation email has been sent to<br><strong>{{ order.customer.user.email }}</strong></p>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="newsletter-card">
+                    <h4>Stay Updated</h4>
+                    <p>Subscribe to our newsletter for exclusive deals and new LEGO releases.</p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Your email" required>
+                        <button type="submit" class="btn-subscribe">Subscribe</button>
+                    </form>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Related Products Section -->
+    <section class="related-products-section">
+        <div class="container">
+            <h2>You Might Also Like</h2>
+            <p class="section-subtitle">Complete your collection with these popular sets</p>
+            <div class="products-grid">
+                <!-- Products would be dynamically loaded here -->
+                <p style="text-align: center; color: var(--text-light); grid-column: 1/-1;">
+                    <a href="{% url 'core:shop' %}">Browse More Products →</a>
+                </p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .confirmation-page-container {
+        background: white;
+        min-height: 100vh;
+    }
+
+    /* Success Header */
+    .success-header {
+        background: linear-gradient(135deg, #4caf50, #45a049);
+        color: white;
+        padding: var(--spacing-lg) 0;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .success-content {
+        text-align: center;
+    }
+
+    .success-icon {
+        font-size: 72px;
+        margin-bottom: var(--spacing);
+        animation: scaleIn 0.5s ease;
+    }
+
+    .success-header h1 {
+        margin: 0 0 var(--spacing) 0;
+        font-size: 42px;
+    }
+
+    .success-header p {
+        margin: 0 0 var(--spacing-lg) 0;
+        font-size: 16px;
+        opacity: 0.95;
+    }
+
+    .order-number {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    .order-number span {
+        font-family: monospace;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    @keyframes scaleIn {
+        from {
+            transform: scale(0);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    /* Main Layout */
+    .confirmation-main {
+        padding: var(--spacing-lg) 0;
+    }
+
+    .confirmation-layout {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: var(--spacing-lg);
+    }
+
+    /* Cards */
+    .status-card,
+    .items-card,
+    .address-card {
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .status-card h3,
+    .items-card h3,
+    .address-card h3 {
+        margin: 0 0 var(--spacing-lg) 0;
+        font-size: 18px;
+        color: var(--text-dark);
+    }
+
+    /* Timeline */
+    .status-timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .timeline-item {
+        display: flex;
+        gap: var(--spacing-lg);
+        padding: var(--spacing-lg) 0;
+        border-left: 3px solid var(--border);
+        padding-left: var(--spacing-lg);
+        margin-left: 15px;
+        position: relative;
+    }
+
+    .timeline-item.completed {
+        border-left-color: #4caf50;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -20px;
+        width: 36px;
+        height: 36px;
+        background: white;
+        border: 3px solid var(--border);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-light);
+        font-size: 14px;
+    }
+
+    .timeline-item.completed .timeline-marker {
+        background: #4caf50;
+        border-color: #4caf50;
+        color: white;
+    }
+
+    .timeline-content h4 {
+        margin: 0 0 4px 0;
+        font-size: 14px;
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .timeline-content p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--text-light);
+    }
+
+    /* Order Items */
+    .order-items-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .order-item {
+        display: flex;
+        gap: var(--spacing-lg);
+        padding: var(--spacing-md);
+        background: var(--light);
+        border-radius: 8px;
+    }
+
+    .item-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 6px;
+        overflow: hidden;
+        background: white;
+        border: 2px solid var(--border);
+    }
+
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        color: var(--border);
+    }
+
+    .item-info {
+        flex: 1;
+    }
+
+    .item-info h4 {
+        margin: 0 0 4px 0;
+        font-size: 14px;
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .item-info .category {
+        margin: 0 0 4px 0;
+        font-size: 12px;
+        color: var(--text-light);
+    }
+
+    .item-info .sku {
+        margin: 0;
+        font-size: 11px;
+        color: var(--text-light);
+        font-family: monospace;
+    }
+
+    .item-details {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+        text-align: right;
+    }
+
+    .item-details .qty {
+        font-size: 12px;
+        color: var(--text-light);
+    }
+
+    .item-details .price {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .item-total {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    /* Totals */
+    .items-divider {
+        height: 2px;
+        background: var(--border);
+        margin: var(--spacing-lg) 0;
+    }
+
+    .order-totals {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing);
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        color: var(--text-dark);
+    }
+
+    .total-row.grand-total {
+        font-size: 16px;
+        font-weight: 700;
+        padding-top: var(--spacing);
+        border-top: 2px solid var(--border);
+    }
+
+    .total-row.grand-total span:last-child {
+        color: #4caf50;
+        font-size: 18px;
+    }
+
+    /* Address Card */
+    .address-content {
+        background: var(--light);
+        padding: var(--spacing-lg);
+        border-radius: 8px;
+        font-size: 14px;
+        color: var(--text-dark);
+        line-height: 1.8;
+    }
+
+    .address-content p {
+        margin: 0;
+    }
+
+    /* Sidebar */
+    .confirmation-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+
+    .actions-card,
+    .service-card,
+    .email-card,
+    .newsletter-card {
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: var(--spacing-lg);
+        height: fit-content;
+    }
+
+    .actions-card h3,
+    .service-card h3 {
+        margin: 0 0 var(--spacing-lg) 0;
+        font-size: 16px;
+        color: var(--text-dark);
+    }
+
+    .actions-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .action-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        background: var(--light);
+        border-radius: 6px;
+        color: var(--text-dark);
+        text-decoration: none;
+        transition: var(--transition);
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .action-item:hover {
+        background: white;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+    }
+
+    .action-item i {
+        font-size: 16px;
+    }
+
+    /* Service Card */
+    .service-card p {
+        margin: 0 0 var(--spacing-md) 0;
+        font-size: 13px;
+        color: var(--text-light);
+        line-height: 1.6;
+    }
+
+    .contact-methods {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .contact-link {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing);
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: var(--light);
+        border-radius: 6px;
+        color: var(--primary);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+
+    .contact-link:hover {
+        background: white;
+        border: 2px solid var(--primary);
+    }
+
+    .contact-link i {
+        font-size: 14px;
+    }
+
+    /* Email Card */
+    .email-card {
+        text-align: center;
+        background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+        border: none;
+    }
+
+    .email-card i {
+        font-size: 32px;
+        color: var(--primary);
+        display: block;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .email-card p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--text-dark);
+    }
+
+    .email-card strong {
+        color: var(--primary);
+    }
+
+    /* Newsletter Card */
+    .newsletter-card h4 {
+        margin: 0 0 var(--spacing-sm) 0;
+        font-size: 14px;
+        color: var(--text-dark);
+    }
+
+    .newsletter-card p {
+        margin: 0 0 var(--spacing-md) 0;
+        font-size: 13px;
+        color: var(--text-light);
+        line-height: 1.5;
+    }
+
+    .newsletter-form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .newsletter-form input {
+        padding: 10px 12px;
+        border: 2px solid var(--border);
+        border-radius: 6px;
+        font-size: 13px;
+    }
+
+    .newsletter-form input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .btn-subscribe {
+        padding: 10px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 13px;
+        transition: var(--transition);
+    }
+
+    .btn-subscribe:hover {
+        background: #cc0005;
+    }
+
+    /* Related Products */
+    .related-products-section {
+        background: var(--light);
+        padding: var(--spacing-lg) 0;
+        margin-top: var(--spacing-lg);
+    }
+
+    .related-products-section h2 {
+        text-align: center;
+        margin-bottom: var(--spacing);
+        font-size: 28px;
+    }
+
+    .section-subtitle {
+        text-align: center;
+        color: var(--text-light);
+        margin-bottom: var(--spacing-lg);
+        font-size: 14px;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: var(--spacing-lg);
+    }
+
+    @media (max-width: 1024px) {
+        .confirmation-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .confirmation-sidebar {
+            position: relative;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .success-header h1 {
+            font-size: 32px;
+        }
+
+        .order-item {
+            flex-direction: column;
+            gap: var(--spacing);
+        }
+
+        .item-image {
+            width: 100%;
+            height: 200px;
+        }
+
+        .item-details {
+            flex-direction: row;
+            align-items: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .success-icon {
+            font-size: 48px;
+        }
+
+        .success-header h1 {
+            font-size: 24px;
+        }
+
+        .status-timeline {
+            display: none;
+        }
+
+        .products-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
