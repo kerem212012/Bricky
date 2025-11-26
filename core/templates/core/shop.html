@@ -97,45 +97,47 @@
                 <!-- Products Grid -->
                 <div class="products-display grid-view" id="products-display">
                     {% for product in object_list %}
-                    <a href="{{ product.get_absolute_url }}" class="product-card">
-                        <div class="product-image">
-                            {% if product.picture %}
-                                <img src="{{ product.picture.url }}" alt="{{ product.name }}">
-                            {% else %}
-                                <div class="image-placeholder">
-                                    <i class="fas fa-cube"></i>
-                                </div>
-                            {% endif %}
-                            <div class="product-badge">
-                                {% if product.stock > 0 %}
-                                    <span class="in-stock">In Stock</span>
+                    <div class="product-card-wrapper">
+                        <a href="{{ product.get_absolute_url }}" class="product-card">
+                            <div class="product-image">
+                                {% if product.picture %}
+                                    <img src="{{ product.picture.url }}" alt="{{ product.name }}">
                                 {% else %}
-                                    <span class="out-stock">Out of Stock</span>
+                                    <div class="image-placeholder">
+                                        <i class="fas fa-cube"></i>
+                                    </div>
                                 {% endif %}
-                            </div>
-                        </div>
-                        <div class="product-content">
-                            <p class="product-category">{{ product.category.title }}</p>
-                            <h3 class="product-name">{{ product.name }}</h3>
-                            <div class="product-rating">
-                                <div class="stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
+                                <div class="product-badge">
+                                    {% if product.stock > 0 %}
+                                        <span class="in-stock">In Stock</span>
+                                    {% else %}
+                                        <span class="out-stock">Out of Stock</span>
+                                    {% endif %}
                                 </div>
-                                <span class="rating-text">({{ product.stock }} in stock)</span>
                             </div>
-                            <p class="product-description">{{ product.description|truncatewords:15 }}</p>
-                            <div class="product-footer">
-                                <span class="product-price">${{ product.price }}</span>
-                                <button class="btn-add-cart" onclick="addToCart(event, '{{ product.id }}')">
-                                    <i class="fas fa-shopping-cart"></i> Add
-                                </button>
+                            <div class="product-content">
+                                <p class="product-category">{{ product.category.title }}</p>
+                                <h3 class="product-name">{{ product.name }}</h3>
+                                <div class="product-rating">
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                    </div>
+                                    <span class="rating-text">({{ product.stock }} in stock)</span>
+                                </div>
+                                <p class="product-description">{{ product.description|truncatewords:15 }}</p>
+                                <div class="product-price">
+                                    <span class="product-price-text">${{ product.price }}</span>
+                                </div>
                             </div>
-                        </div>
-                    </a>
+                        </a>
+                        <button class="btn-add-cart" onclick="addToCart(event, '{{ product.id }}')">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </button>
+                    </div>
                     {% empty %}
                     <div class="no-products">
                         <i class="fas fa-box"></i>
@@ -384,6 +386,12 @@
         grid-template-columns: 1fr;
     }
 
+    .product-card-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
     .product-card {
         background: white;
         border: 2px solid var(--border);
@@ -394,6 +402,7 @@
         color: inherit;
         display: flex;
         flex-direction: column;
+        flex: 1;
     }
 
     .list-view .product-card {
@@ -518,34 +527,37 @@
         flex-grow: 1;
     }
 
-    .product-footer {
+    .product-price {
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: var(--spacing);
         margin-top: auto;
+        padding-top: var(--spacing);
     }
 
-    .product-price {
+    .product-price-text {
         font-size: 20px;
         font-weight: 700;
         color: var(--primary);
     }
 
     .btn-add-cart {
-        padding: 8px 12px;
+        padding: 10px 16px;
         background: var(--primary);
         color: white;
         border: none;
         border-radius: 6px;
         cursor: pointer;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 600;
         transition: var(--transition);
         display: flex;
         align-items: center;
-        gap: 4px;
+        justify-content: center;
+        gap: 6px;
         white-space: nowrap;
+        width: 100%;
     }
 
     .btn-add-cart:hover {
@@ -716,6 +728,7 @@
 
     function addToCart(e, productId) {
         e.preventDefault();
+        e.stopPropagation();
         
         {% if user.is_authenticated %}
         const form = new FormData();
