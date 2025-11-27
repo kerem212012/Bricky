@@ -113,7 +113,7 @@
                         <div class="product-actions">
                             {% if product.stock > 0 %}
                             <button class="btn-primary" onclick="event.preventDefault(); addToCart('{{ product.id }}', '{{ product.name }}')">
-                                Add to Bag
+                                Add to Cart
                             </button>
                             {% else %}
                             <button class="btn-secondary" onclick="event.preventDefault(); notifyMe('{{ product.id }}')">
@@ -330,6 +330,10 @@
         `;
         document.body.appendChild(notification);
         setTimeout(() => notification.remove(), 3000);
+    }
+
+    function notifyMe(productId) {
+        showNotification('Notify feature coming soon!', 'info');
     }
 
     function handleNewsletter(e) {

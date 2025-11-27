@@ -134,9 +134,15 @@
                                 </div>
                             </div>
                         </a>
-                        <button class="btn-add-cart" onclick="addToCart(event, '{{ product.id }}')">
-                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        {% if product.stock > 0 %}
+                        <button class="btn-add-cart" onclick="event.preventDefault(); addToCart('{{ product.id }}', '{{ product.name }}')">
+                            Add to Cart
                         </button>
+                        {% else %}
+                        <button class="btn-add-cart" onclick="event.preventDefault(); notifyMe('{{ product.id }}')">
+                            Notify Me
+                        </button>
+                        {% endif %}
                     </div>
                     {% empty %}
                     <div class="no-products">

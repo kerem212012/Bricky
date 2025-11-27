@@ -2,112 +2,56 @@
    BRICKY LEGO STORE - Professional JavaScript
    ============================================ */
 
-// Cart Management
-let cart = JSON.parse(localStorage.getItem('lego-cart')) || [];
+// Get CSRF token from cookies
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
-// Update cart count
-function updateCartCount() {
-    const count = cart.reduce((total, item) => total + item.quantity, 0);
+// Add to cart via AJAX
+function addToCart(productId, productName) {
+    const form = new FormData();
+    form.append('product_id', productId);
+    form.append('quantity', 1);
+
+    fetch("/cart/add/", {
+        method: 'POST',
+        body: form,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(productName + ' added to cart', 'success');
+            updateCartCount(data.cart_count);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error adding to cart', 'error');
+    });
+}
+
+// Update cart count in navbar
+function updateCartCount(count) {
     const cartCount = document.querySelector('.cart-count');
     if (cartCount) {
         cartCount.textContent = count;
-        cartCount.style.display = count > 0 ? 'flex' : 'none';
     }
-}
-
-// Add to cart
-function addToCart(productId, productName) {
-    const existingItem = cart.find(item => item.id === productId);
-    
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({
-            id: productId,
-            name: productName,
-            quantity: 1
-        });
-    }
-    
-    localStorage.setItem('lego-cart', JSON.stringify(cart));
-    updateCartCount();
-    showNotification(`${productName} added to bag!`, 'success');
-    updateCartDisplay();
-}
-
-// Remove from cart
-function removeFromCart(productId) {
-    cart = cart.filter(item => item.id !== productId);
-    localStorage.setItem('lego-cart', JSON.stringify(cart));
-    updateCartCount();
-    updateCartDisplay();
-}
-
-// Update cart display
-function updateCartDisplay() {
-    const cartItems = document.getElementById('cart-items');
-    if (!cartItems) return;
-    
-    if (cart.length === 0) {
-        cartItems.innerHTML = '<p class="empty-cart">Your bag is empty</p>';
-        return;
-    }
-    
-    cartItems.innerHTML = cart.map(item => `
-        <div class="cart-item" style="padding: 12px; border-bottom: 1px solid #e0e0e0;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                <strong>${item.name}</strong>
-                <button onclick="removeFromCart('${item.id}')" style="background: none; border: none; color: #e40006; cursor: pointer;">×</button>
-            </div>
-            <div style="display: flex; gap: 8px;">
-                <button onclick="decrementQuantity('${item.id}')" style="padding: 4px 8px; border: 1px solid #e0e0e0; background: white; cursor: pointer;">-</button>
-                <input type="number" value="${item.quantity}" readonly style="width: 40px; text-align: center; border: 1px solid #e0e0e0;">
-                <button onclick="incrementQuantity('${item.id}')" style="padding: 4px 8px; border: 1px solid #e0e0e0; background: white; cursor: pointer;">+</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-// Increment quantity
-function incrementQuantity(productId) {
-    const item = cart.find(item => item.id === productId);
-    if (item) {
-        item.quantity += 1;
-        localStorage.setItem('lego-cart', JSON.stringify(cart));
-        updateCartDisplay();
-    }
-}
-
-// Decrement quantity
-function decrementQuantity(productId) {
-    const item = cart.find(item => item.id === productId);
-    if (item && item.quantity > 1) {
-        item.quantity -= 1;
-        localStorage.setItem('lego-cart', JSON.stringify(cart));
-        updateCartDisplay();
-    }
-}
-
-// Toggle cart sidebar
-function toggleCart() {
-    const sidebar = document.getElementById('cart-sidebar');
-    if (sidebar) {
-        sidebar.classList.toggle('active');
-        updateCartDisplay();
-    }
-}
-
-// Checkout
-function checkout() {
-    if (cart.length === 0) {
-        showNotification('Your bag is empty', 'warning');
-        return;
-    }
-    showNotification('Proceeding to checkout...', 'info');
-    // Redirect to checkout page or payment gateway
-    setTimeout(() => {
-        console.log('Cart items:', cart);
-    }, 1000);
 }
 
 // Notify me when back in stock
@@ -207,8 +151,6 @@ function backToTop() {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    updateCartCount();
-    updateCartDisplay();
     setupMobileNav();
     setupFilters();
     setupBackToTop();
@@ -238,12 +180,6 @@ function observeElements() {
 
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
-    // Ctrl+C or Cmd+C for cart
-    if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
-        e.preventDefault();
-        toggleCart();
-    }
-    
     // Ctrl+T or Cmd+T for top
     if ((e.ctrlKey || e.metaKey) && e.key === 't') {
         e.preventDefault();
