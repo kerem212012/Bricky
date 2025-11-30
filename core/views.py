@@ -246,9 +246,61 @@ class ContactView(TemplateView):
 
 class NewReleasesView(TemplateView):
     """
-    View for displaying the New Releases page
+    View for displaying the New Releases page with old and coming soon products
     """
     template_name = 'core/new_releases.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get status filter from query params
+        status = self.request.GET.get('status', '')
+        
+        # Get sorting from query params
+        sort = self.request.GET.get('sort', '-created_at')
+        
+        # Base queryset for active products with NEW, OLD or COMING_SOON status
+        queryset = Product.objects.filter(
+            is_active=True,
+            status__in=['N', 'O', 'C']  # New, Old and Coming Soon products
+        ).select_related('category')
+        
+        # Apply status filter if provided
+        if status == 'new':
+            queryset = queryset.filter(status='N')
+        elif status == 'old':
+            queryset = queryset.filter(status='O')
+        elif status == 'coming_soon':
+            queryset = queryset.filter(status='C')
+        
+        # Apply sorting
+        queryset = queryset.order_by(sort)
+        
+        # Separate products by status
+        new_products = Product.objects.filter(
+            is_active=True,
+            status='N'
+        ).select_related('category').order_by(sort)
+        
+        old_products = Product.objects.filter(
+            is_active=True,
+            status='O'
+        ).select_related('category').order_by(sort)
+        
+        coming_soon_products = Product.objects.filter(
+            is_active=True,
+            status='C'
+        ).select_related('category').order_by(sort)
+        
+        context['products'] = queryset
+        context['new_products'] = new_products
+        context['old_products'] = old_products
+        context['coming_soon_products'] = coming_soon_products
+        context['status_filter'] = status
+        context['sort'] = sort
+        context['categories'] = Category.objects.all()
+        
+        return context
 
 
 class SearchView(ListView):

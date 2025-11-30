@@ -24,6 +24,13 @@ class Category(models.Model):
             models.Index(fields=["title"])
         ]
 class Product(models.Model):
+    class StatusChoice(models.TextChoices):
+        NEW = "N", "New product"
+        OLD = "O", "Old product"
+        COMMING_SOON = "C", "Comming soon product"
+
+    status = models.CharField(max_length=1, choices=StatusChoice.choices, db_index=True,
+                              default=StatusChoice.NEW)
     id: uuid.UUID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name: str = models.CharField(max_length=255, db_index=True)
     slug: str = models.SlugField(unique=True, db_index=True)

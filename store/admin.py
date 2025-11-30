@@ -11,14 +11,14 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'price', 'stock', 'is_active', 'created_at']
+    list_display = ['name', "status" ,'category', 'price', 'stock', 'is_active', 'created_at']
     list_filter = ['category', 'is_active', 'created_at']
     search_fields = ['name', 'slug', 'description']
     prepopulated_fields = {'slug': ('name',)}
     readonly_fields = ['created_at', 'updated_at']
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'slug', 'category', 'description')
+            'fields': ('name',"status" ,'slug', 'category', 'description')
         }),
         ('Pricing & Stock', {
             'fields': ('price', 'stock')

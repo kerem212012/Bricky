@@ -15,21 +15,20 @@
         <div class="releases-filter">
             <form method="get" class="filter-form">
                 <div class="filter-group">
-                    <select name="category" class="filter-select">
-                        <option value="">All Categories</option>
-                        <option value="sets">LEGO Sets</option>
-                        <option value="themes">LEGO Themes</option>
-                        <option value="minifigures">Minifigures</option>
-                        <option value="accessories">Accessories</option>
+                    <select name="status" class="filter-select">
+                        <option value="">All Products</option>
+                        <option value="new" {% if status_filter == 'new' %}selected{% endif %}>New Products</option>
+                        <option value="old" {% if status_filter == 'old' %}selected{% endif %}>Old Products</option>
+                        <option value="coming_soon" {% if status_filter == 'coming_soon' %}selected{% endif %}>Coming Soon</option>
                     </select>
                 </div>
 
                 <div class="filter-group">
                     <select name="sort" class="filter-select">
-                        <option value="-created_at">Newest First</option>
-                        <option value="price">Price: Low to High</option>
-                        <option value="-price">Price: High to Low</option>
-                        <option value="name">Name: A-Z</option>
+                        <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>Newest First</option>
+                        <option value="price" {% if sort == 'price' %}selected{% endif %}>Price: Low to High</option>
+                        <option value="-price" {% if sort == '-price' %}selected{% endif %}>Price: High to Low</option>
+                        <option value="name" {% if sort == 'name' %}selected{% endif %}>Name: A-Z</option>
                     </select>
                 </div>
 
@@ -39,104 +38,69 @@
 
         <!-- New Releases Grid -->
         <div class="releases-grid">
-            <!-- Sample Cards -->
-            <div class="release-card">
-                <div class="release-badge">NEW</div>
-                <div class="release-image">
-                    <div class="image-placeholder">
-                        <i class="fas fa-cube"></i>
+            {% if products %}
+                {% for product in products %}
+                    <div class="release-card">
+                        <div class="release-badge">
+                            {% if product.status == 'N' %}
+                                NEW
+                            {% elif product.status == 'O' %}
+                                OLD
+                            {% elif product.status == 'C' %}
+                                COMING SOON
+                            {% endif %}
+                        </div>
+                        <div class="release-image">
+                            {% if product.picture and product.picture.name != 'products/default.png' %}
+                                <img src="{{ product.picture.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                                <div class="image-placeholder">
+                                    <i class="fas fa-cube"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="release-content">
+                            <p class="release-category">{{ product.category.title }}</p>
+                            <h3>{{ product.name }}</h3>
+                            <p class="release-date">{{ product.created_at|date:"F Y" }}</p>
+                            <p class="release-description">{{ product.description|truncatewords:15 }}</p>
+                            <div class="release-price">${{ product.price }}</div>
+                            {% if product.status == 'C' %}
+                                <button class="btn-secondary" style="width: 100%;">Notify Me</button>
+                            {% else %}
+                                <a href="{{ product.get_absolute_url }}" class="btn-primary" style="width: 100%; display: block; text-align: center; text-decoration: none;">View Details</a>
+                            {% endif %}
+                        </div>
                     </div>
+                {% endfor %}
+            {% else %}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                    <p style="font-size: 18px; color: var(--text-light);">No products found in this category.</p>
                 </div>
-                <div class="release-content">
-                    <p class="release-category">Sets</p>
-                    <h3>LEGO City Collection</h3>
-                    <p class="release-date">Released: November 2024</p>
-                    <p class="release-description">Build your dream city with this amazing collection.</p>
-                    <div class="release-price">$79.99</div>
-                    <button class="btn-primary" style="width: 100%;">View Details</button>
-                </div>
-            </div>
-
-            <div class="release-card">
-                <div class="release-badge">NEW</div>
-                <div class="release-image">
-                    <div class="image-placeholder">
-                        <i class="fas fa-cube"></i>
-                    </div>
-                </div>
-                <div class="release-content">
-                    <p class="release-category">Themes</p>
-                    <h3>LEGO Star Wars</h3>
-                    <p class="release-date">Released: October 2024</p>
-                    <p class="release-description">May the Force be with you in this epic Star Wars set.</p>
-                    <div class="release-price">$149.99</div>
-                    <button class="btn-primary" style="width: 100%;">View Details</button>
-                </div>
-            </div>
-
-            <div class="release-card">
-                <div class="release-badge">NEW</div>
-                <div class="release-image">
-                    <div class="image-placeholder">
-                        <i class="fas fa-cube"></i>
-                    </div>
-                </div>
-                <div class="release-content">
-                    <p class="release-category">Minifigures</p>
-                    <h3>LEGO Minifigure Collection</h3>
-                    <p class="release-date">Released: November 2024</p>
-                    <p class="release-description">Expand your collection with exclusive minifigures.</p>
-                    <div class="release-price">$9.99</div>
-                    <button class="btn-primary" style="width: 100%;">View Details</button>
-                </div>
-            </div>
-
-            <div class="release-card">
-                <div class="release-badge">COMING SOON</div>
-                <div class="release-image">
-                    <div class="image-placeholder">
-                        <i class="fas fa-cube"></i>
-                    </div>
-                </div>
-                <div class="release-content">
-                    <p class="release-category">Sets</p>
-                    <h3>LEGO Marvel Collection</h3>
-                    <p class="release-date">Coming: December 2024</p>
-                    <p class="release-description">New Marvel-themed LEGO sets coming soon.</p>
-                    <div class="release-price">$99.99</div>
-                    <button class="btn-secondary" style="width: 100%;">Notify Me</button>
-                </div>
-            </div>
+            {% endif %}
         </div>
 
-        <!-- Timeline Section -->
-        <section class="timeline-section">
-            <h2>Release Timeline</h2>
-            <div class="timeline">
-                <div class="timeline-item">
-                    <div class="timeline-date">November 2024</div>
-                    <div class="timeline-content">
-                        <h4>Holiday Season Collection</h4>
-                        <p>Festive LEGO sets perfect for holiday gifting</p>
-                    </div>
+        <!-- Product Stats Section -->
+        {% if new_products or old_products or coming_soon_products %}
+            <section class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-number">{{ new_products.count }}</div>
+                    <div class="stat-label">New Products</div>
                 </div>
-                <div class="timeline-item">
-                    <div class="timeline-date">December 2024</div>
-                    <div class="timeline-content">
-                        <h4>Marvel Universe Expansion</h4>
-                        <p>New superhero-themed LEGO sets arrive</p>
-                    </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ old_products.count }}</div>
+                    <div class="stat-label">Old Products</div>
                 </div>
-                <div class="timeline-item">
-                    <div class="timeline-date">January 2025</div>
-                    <div class="timeline-content">
-                        <h4>LEGO Architecture Series</h4>
-                        <p>Famous landmarks in LEGO form</p>
-                    </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ coming_soon_products.count }}</div>
+                    <div class="stat-label">Coming Soon</div>
                 </div>
-            </div>
-        </section>
-
+                <div class="stat-card">
+                    <div class="stat-number">{{ products.count }}</div>
+                    <div class="stat-label">Total Products</div>
+                </div>
+            </section>
+        {% endif %}
         <!-- Newsletter CTA -->
         <section class="newsletter-cta">
             <div class="newsletter-content">
@@ -257,6 +221,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
     }
 
     .image-placeholder {
@@ -303,89 +268,31 @@
         margin-bottom: var(--spacing-md);
     }
 
-    .timeline-section {
+    .stats-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-lg);
         margin: var(--spacing-lg) 0;
+        padding: var(--spacing-lg);
+        background: var(--light);
+        border-radius: 12px;
     }
 
-    .timeline-section h2 {
+    .stat-card {
         text-align: center;
-        font-size: 28px;
-        margin-bottom: var(--spacing-lg);
+        padding: var(--spacing-md);
     }
 
-    .timeline {
-        position: relative;
-        padding: var(--spacing-lg) 0;
-    }
-
-    .timeline::before {
-        content: '';
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 2px;
-        height: 100%;
-        background: var(--primary);
-    }
-
-    .timeline-item {
-        margin-bottom: var(--spacing-lg);
-        position: relative;
-    }
-
-    .timeline-item:nth-child(odd) .timeline-date {
-        text-align: right;
-        margin-right: 51%;
-        padding-right: var(--spacing-md);
-    }
-
-    .timeline-item:nth-child(odd) .timeline-content {
-        margin-left: 51%;
-        padding-left: var(--spacing-md);
-    }
-
-    .timeline-item:nth-child(even) .timeline-date {
-        text-align: left;
-        margin-left: 51%;
-        padding-left: var(--spacing-md);
-    }
-
-    .timeline-item:nth-child(even) .timeline-content {
-        margin-right: 51%;
-        padding-right: var(--spacing-md);
-        text-align: right;
-    }
-
-    .timeline-item::before {
-        content: '';
-        position: absolute;
-        left: 50%;
-        top: 0;
-        transform: translateX(-50%);
-        width: 12px;
-        height: 12px;
-        background: var(--primary);
-        border: 3px solid white;
-        border-radius: 50%;
-        z-index: 10;
-    }
-
-    .timeline-date {
+    .stat-number {
+        font-size: 36px;
         font-weight: 700;
         color: var(--primary);
-        font-size: 16px;
+        margin-bottom: var(--spacing-sm);
     }
 
-    .timeline-content h4 {
-        margin: var(--spacing) 0 var(--spacing-sm) 0;
+    .stat-label {
         font-size: 16px;
-        color: var(--text-dark);
-    }
-
-    .timeline-content p {
-        margin: 0;
         color: var(--text-light);
-        font-size: 14px;
     }
 
     .newsletter-cta {
@@ -427,6 +334,24 @@
         white-space: nowrap;
     }
 
+    .btn-secondary {
+        background: var(--secondary);
+        color: white;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-secondary:hover {
+        opacity: 0.9;
+    }
+
     @media (max-width: 768px) {
         .page-header h1 {
             font-size: 28px;
@@ -444,27 +369,8 @@
             grid-template-columns: 1fr;
         }
 
-        .timeline::before {
-            left: 0;
-        }
-
-        .timeline-item:nth-child(odd) .timeline-date,
-        .timeline-item:nth-child(even) .timeline-date {
-            text-align: left;
-            margin: 0;
-            padding-left: 40px;
-        }
-
-        .timeline-item:nth-child(odd) .timeline-content,
-        .timeline-item:nth-child(even) .timeline-content {
-            margin-left: 0;
-            margin-right: 0;
-            padding-left: 40px;
-            text-align: left;
-        }
-
-        .timeline-item::before {
-            left: 0;
+        .stats-section {
+            grid-template-columns: 1fr;
         }
 
         .newsletter-form {
