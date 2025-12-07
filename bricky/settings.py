@@ -9,8 +9,8 @@ env = Env()
 env.read_env()
 
 SECRET_KEY = env.str("SECRET_KEY", "replace_me")
-DEBUG = env.bool("DEBUG", False)
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", ["127.0.0.1", "localhost"])
+DEBUG = env.bool("DEBUG", True)
+ALLOWED_HOSTS = ["*"]
 
 AUTH_USER_MODEL = "users.CustomUser"
 INSTALLED_APPS = [
@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 
     'users',
     'core',
@@ -30,6 +31,8 @@ INSTALLED_APPS = [
     'phonenumber_field',
     'debug_toolbar',
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -110,6 +113,9 @@ EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', True)
 EMAIL_HOST_USER = env.str('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL', 'noreply@bricky.com')
+
+# Token Configuration - 24 hours in seconds (86400 seconds)
+PASSWORD_RESET_TIMEOUT = env.int('PASSWORD_RESET_TIMEOUT', 86400)
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

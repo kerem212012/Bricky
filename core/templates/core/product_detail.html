@@ -39,7 +39,7 @@
                 </div>
                 <div class="image-thumbnails">
                     {% if product.picture %}
-                        <img src="{{ product.picture.url }}" alt="Thumbnail" class="thumbnail active" onclick="changeImage(this)">
+                        <img src="{{ product.picture.url }}" alt="Thumbnail" class="thumbnail active" data-change-image>
                     {% endif %}
                 </div>
             </div>
@@ -85,10 +85,6 @@
                     <h3>Product Details</h3>
                     <div class="specs-grid">
                         <div class="spec">
-                            <span class="spec-label">SKU</span>
-                            <span class="spec-value">{{ product.id|truncatechars:8 }}</span>
-                        </div>
-                        <div class="spec">
                             <span class="spec-label">Category</span>
                             <span class="spec-value">{{ product.category.title }}</span>
                         </div>
@@ -114,21 +110,24 @@
                     <div class="quantity-selector">
                         <label for="quantity">Quantity:</label>
                         <div class="quantity-control">
-                            <button class="qty-btn" onclick="decreaseQty()">
+                            <button class="qty-btn" id="qty-decrease">
                                 <i class="fas fa-minus"></i>
                             </button>
                             <input type="number" id="quantity" value="1" min="1" max="{{ product.stock }}" readonly>
-                            <button class="qty-btn" onclick="increaseQty({{ product.stock }})">
+                            <button class="qty-btn" id="qty-increase" data-max-stock="{{ product.stock }}">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
                     </div>
-
-                    <button class="btn-primary btn-add-to-cart" 
-                            onclick="addToCart(event, '{{ product.id }}')"
-                            {% if product.stock == 0 %}disabled{% endif %}>
+                    <button class="btn-primary btn-add-to-cart" id="add-to-cart-btn"
+                            data-product-id="{{ product.id }}" data-product-name="{{ product.name }}"
+                            {% if product.stock == 0 %}disabled title="Out of stock"{% endif %}>
                         <i class="fas fa-shopping-cart"></i>
-                        Add to Cart
+                        {% if product.stock > 0 %}
+                            Add to Cart
+                        {% else %}
+                            Out of Stock
+                        {% endif %}
                     </button>
                 </div>
 
@@ -156,20 +155,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Share -->
-                <div class="product-share">
-                    <span>Share:</span>
-                    <a href="#" class="share-btn facebook" title="Share on Facebook">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="#" class="share-btn twitter" title="Share on Twitter">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a href="#" class="share-btn pinterest" title="Share on Pinterest">
-                        <i class="fab fa-pinterest-p"></i>
-                    </a>
-                </div>
             </div>
         </div>
     </div>
@@ -178,9 +163,9 @@
     <section class="product-tabs-section">
         <div class="container">
             <div class="tabs-header">
-                <button class="tab-btn active" onclick="switchTab(event, 'details')">Details</button>
-                <button class="tab-btn" onclick="switchTab(event, 'reviews')">Reviews</button>
-                <button class="tab-btn" onclick="switchTab(event, 'shipping')">Shipping Info</button>
+                <button class="tab-btn active" data-tab="details">Details</button>
+                <button class="tab-btn" data-tab="reviews">Reviews</button>
+                <button class="tab-btn" data-tab="shipping">Shipping Info</button>
             </div>
 
             <!-- Details Tab -->
@@ -294,6 +279,22 @@
             </div>
         </div>
     </section>
+
+    <!-- Newsletter CTA Section -->
+    <section class="newsletter-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-top: 60px;">
+        <div class="container">
+            <div class="newsletter-content" style="color: white;">
+                <h2 style="color: white;">Don't Miss Out!</h2>
+                <p style="color: rgba(255,255,255,0.9);">Get exclusive discounts on new LEGO sets and building tips delivered to your inbox</p>
+                <form class="newsletter-form" id="newsletter-form-product" action="{% url 'core:newsletter_subscribe_ajax' %}" style="max-width: 400px; margin: 20px auto;">
+                    {% csrf_token %}
+                    <input type="email" name="email" placeholder="Enter your email" required style="border: none; padding: 12px 15px;">
+                    <button type="submit" class="btn-primary" style="background: white; color: #667eea; font-weight: 600;">Subscribe Now</button>
+                </form>
+                <div id="newsletter-message-product" style="margin-top: 15px; text-align: center; color: white; font-size: 14px;"></div>
+            </div>
+        </div>
+    </section>
 </div>
 
     </section>
@@ -304,36 +305,4 @@
     const addToCartUrl = "{% url 'core:add_to_cart' %}";
 </script>
 <script src="{% static 'store/js/product-detail.js' %}"></script>
-<script>
-    function addToCart(e, productId) {
-        e.preventDefault();
-        
-        const quantity = parseInt(document.getElementById('quantity').value);
-        const form = new FormData();
-        form.append('product_id', productId);
-        form.append('quantity', quantity);
-
-        fetch(addToCartUrl, {
-            method: 'POST',
-            body: form,
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showNotification(data.message, 'success');
-                updateCartCount(data.cart_count);
-                document.getElementById('quantity').value = 1;
-            } else {
-                showNotification(data.message, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification('Error adding to cart', 'error');
-        });
-    }
-</script>
 {% endblock %}

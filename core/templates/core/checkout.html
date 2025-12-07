@@ -228,26 +228,6 @@
 
                     <a href="{% url 'core:cart' %}" class="btn-edit-cart">← Back to Cart</a>
                 </div>
-
-                <!-- Security Info -->
-                <div class="security-info">
-                    <h4>Your Order is Secure</h4>
-                    <ul>
-                        <li><i class="fas fa-lock"></i> SSL Encrypted</li>
-                        <li><i class="fas fa-shield-alt"></i> Fraud Protection</li>
-                        <li><i class="fas fa-undo"></i> 30-Day Returns</li>
-                        <li><i class="fas fa-headset"></i> 24/7 Support</li>
-                    </ul>
-                </div>
-
-                <!-- Promo Code -->
-                <div class="promo-card">
-                    <h4>Have a Promo Code?</h4>
-                    <div class="promo-form">
-                        <input type="text" placeholder="Enter code" class="promo-input">
-                        <button type="button" class="btn-apply-code">Apply</button>
-                    </div>
-                </div>
             </div>
         </div>
         {% endif %}
@@ -531,6 +511,24 @@
         width: 100%;
         padding: var(--spacing-md);
         margin-top: var(--spacing);
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .btn-place-order:hover {
+        background: #3d50dd;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(67, 97, 207, 0.2);
+    }
+
+    .btn-place-order:active {
+        transform: translateY(0);
     }
 
     /* Order Summary Section */
@@ -647,14 +645,18 @@
         border-radius: 6px;
         text-decoration: none;
         text-align: center;
-        font-weight: 600;
+        font-weight: 700;
+        font-size: 13px;
         transition: var(--transition);
         display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     .btn-edit-cart:hover {
         border-color: var(--primary);
         color: var(--primary);
+        background: rgba(67, 97, 207, 0.05);
     }
 
     /* Security Info */
@@ -758,6 +760,12 @@
         .payment-options {
             grid-template-columns: 1fr 1fr;
         }
+
+        /* Buttons layout for smaller screens */
+        .btn-place-order,
+        .btn-edit-cart {
+            width: 100%;
+        }
     }
 
     @media (max-width: 768px) {
@@ -800,34 +808,11 @@
             margin-top: var(--spacing-sm);
         }
     }
-</style>
+}
 
-<script>
-    // Payment method toggle
-    document.querySelectorAll('input[name="payment"]').forEach(input => {
-        input.addEventListener('change', function() {
-            const cardDetails = document.getElementById('card-details');
-            if (this.value === 'credit_card') {
-                cardDetails.style.display = 'block';
-            } else {
-                cardDetails.style.display = 'none';
-            }
-        });
-    });
+<link rel="stylesheet" href="{% static 'core/css/checkout.css' %}">
 
-    // Initialize card details visibility
-    const cardDetails = document.getElementById('card-details');
-    if (cardDetails && document.querySelector('input[name="payment"]:checked').value !== 'credit_card') {
-        cardDetails.style.display = 'none';
-    }
 
-    // Form validation
-    document.querySelector('.checkout-form').addEventListener('submit', function(e) {
-        const terms = document.querySelector('input[name="terms"]');
-        if (!terms.checked) {
-            e.preventDefault();
-            alert('Please agree to the Terms of Service and Privacy Policy');
-        }
-    });
-</script>
+
+<script src="{% static 'core/js/checkout.js' %}"></script>
 {% endblock %}

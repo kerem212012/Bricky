@@ -59,7 +59,7 @@ class Order(models.Model):
                                 validators=[MinValueValidator(0)], default=0)
 
     def __str__(self):
-        return f"{self.user.username} | {self.status}"
+        return f"{self.customer.user.username} | {self.status}"
 
     def calculate_total(self):
         total = sum(item.total_price for item in self.order_items.all())
@@ -89,8 +89,84 @@ class OrderElement(models.Model):
 
     @property
     def total_price(self) -> Decimal:
-        return self.price * self.quantity
+        price = self.price if self.price is not None else Decimal('0.00')
+        quantity = self.quantity if self.quantity is not None else 0
+        return price * quantity
 
     class Meta:
         verbose_name = 'Order Element'
         verbose_name_plural = 'Order Elements'
+
+
+class Delivery(models.Model):
+    """
+    Model representing delivery information for an order
+    """
+    class DeliveryMethod(models.TextChoices):
+        STANDARD = "standard", "Standard Delivery (5-7 days)"
+        EXPRESS = "express", "Express Delivery (2-3 days)"
+        OVERNIGHT = "overnight", "Overnight Delivery (Next day)"
+        PICKUP = "pickup", "In-Store Pickup"
+
+    class DeliveryStatus(models.TextChoices):
+        PENDING = "pending", "Pending"
+        IN_TRANSIT = "in_transit", "In Transit"
+        OUT_FOR_DELIVERY = "out_for_delivery", "Out for Delivery"
+        DELIVERED = "delivered", "Delivered"
+        FAILED = "failed", "Delivery Failed"
+        RETURNED = "returned", "Returned"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    order = models.OneToOneField(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="delivery"
+    )
+    method = models.CharField(
+        max_length=20,
+        choices=DeliveryMethod.choices,
+        default=DeliveryMethod.STANDARD
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=DeliveryStatus.choices,
+        default=DeliveryStatus.PENDING,
+        db_index=True
+    )
+    tracking_number = models.CharField(max_length=100, blank=True, null=True, unique=True)
+    delivery_cost = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=0,
+        validators=[MinValueValidator(0)]
+    )
+    estimated_delivery_date = models.DateField(blank=True, null=True)
+    actual_delivery_date = models.DateField(blank=True, null=True)
+    delivery_address = models.TextField()
+    delivery_notes = models.TextField(blank=True)
+    recipient_name = models.CharField(max_length=255, blank=True)
+    recipient_phone = PhoneNumberField(blank=True)
+    signature_required = models.BooleanField(default=False)
+    insurance = models.BooleanField(default=False)
+    insurance_cost = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=0,
+        validators=[MinValueValidator(0)]
+    )
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"Delivery for Order {self.order.id} - {self.get_status_display()}"
+
+    class Meta:
+        verbose_name = 'Delivery'
+        verbose_name_plural = 'Deliveries'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['tracking_number']),
+            models.Index(fields=['order']),
+        ]
+

@@ -293,12 +293,36 @@
     width: 100%;
     padding: var(--spacing-md);
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), #3d50dd);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(67, 97, 207, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.btn-add-to-cart:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(67, 97, 207, 0.3);
+}
+
+.btn-add-to-cart:active:not(:disabled) {
+    transform: translateY(0);
 }
 
 .btn-add-to-cart:disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
+    background: linear-gradient(135deg, #999, #777);
+    box-shadow: none;
 }
 
 .btn-wishlist {

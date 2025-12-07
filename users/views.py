@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.conf import settings
 from django.contrib.auth import login, authenticate, logout, get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -69,7 +70,12 @@ class RegisterView(TemplateView):
             user.set_password(password)
             user.is_active = True
             user.save()
+            
+            # Send verification email BEFORE login
+            # This ensures the user state is stable when generating the token
             send_verification(request, user)
+            
+            # Login after email is sent (not critical for token)
             login(request, user)
             return redirect('core:index')
         context = self.get_context_data(**kwargs)
@@ -119,44 +125,126 @@ def user_logout(request) -> Any:
 def send_verification(request, user) -> Any:
     """
     Send email verification link to the user
+    Uses Django's built-in token system which is reliable
     """
     try:
+        # Ensure user is saved to database
+        if not user.pk:
+            user.save()
+        
+        # Generate token from fresh database fetch
+        User = get_user_model()
+        user = User.objects.get(pk=user.pk)
+        
+        # Use Django's default token generator
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
+        
+        if isinstance(uid, bytes):
+            uid = uid.decode()
+        
         domain = get_current_site(request).domain
+        
+        # Build the verification link
         link = reverse("users:verify_email", kwargs={"uidb64": uid, "token": token})
-        verify_url = f"http://{domain}{link}"
-        subject = "Email confirmation"
+        protocol = "https" if not settings.DEBUG else "http"
+        verify_url = f"{protocol}://{domain}{link}"
+        
+        # Prepare email
+        subject = "Email confirmation - Bricky"
         message = render_to_string("users/email_verify.html", {
             "user": user,
             "verify_url": verify_url,
+            "domain": domain,
         })
 
-        send_mail(subject, message, None, [user.email], html_message=message)
+        # Send email
+        send_mail(
+            subject=subject, 
+            message=message, 
+            from_email=None, 
+            recipient_list=[user.email], 
+            html_message=message,
+            fail_silently=False
+        )
+        print(f"✓ Verification email sent to {user.email}")
+        
     except Exception as e:
-        # Log the error but don't crash the registration
-        print(f"Email verification error: {str(e)}")
-        pass
+        print(f"✗ Email error: {str(e)}")
+        import traceback
+        traceback.print_exc()
 
 
 class EmailVerifyView(TemplateView):
     """
     View to verify user's email address
-    GET: verify email using uid and token from the link
-    Renders success or failure template based on verification result
+    Simple and reliable token validation
     """
     template_name = 'users/email_verified_success.html'
 
     def get(self, request, uidb64, token, *args, **kwargs):
         User = get_user_model()
+        
         try:
+            # Decode the UID
             uid = urlsafe_base64_decode(uidb64).decode()
             user = User.objects.get(pk=uid)
-        except Exception:
-            user = None
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            return render(request, 'users/email_verified_failed.html', {
+                'error': 'Invalid verification link.',
+                'show_resend': True
+            })
 
-        if user and default_token_generator.check_token(user, token):
+        # Validate the token
+        if default_token_generator.check_token(user, token):
+            # Mark email as verified
             user.email_is_verified = True
-            user.save()
-            return render(request, 'users/email_verified_success.html')
-        return render(request, 'users/email_verified_failed.html')
+            user.save(update_fields=['email_is_verified'])
+            return render(request, 'users/email_verified_success.html', {
+                'user': user,
+                'message': 'Your email has been successfully verified!'
+            })
+        
+        # Token is invalid or expired
+        return render(request, 'users/email_verified_failed.html', {
+            'error': 'The verification link is invalid or has expired.',
+            'show_resend': True
+        })
+
+
+class ResendVerificationEmailView(LoginRequiredMixin, TemplateView):
+    """
+    View to resend email verification link
+    """
+    template_name = 'users/email_resend.html'
+    login_url = 'users:login'
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        
+        # If email is already verified, redirect to profile
+        if user.email_is_verified:
+            return redirect('users:profile')
+        
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        
+        # If email is already verified, redirect to profile
+        if user.email_is_verified:
+            return redirect('users:profile')
+        
+        # Resend verification email
+        try:
+            send_verification(request, user)
+            context = self.get_context_data(**kwargs)
+            context['message'] = 'Verification email sent! Please check your inbox.'
+            context['message_type'] = 'success'
+            return self.render_to_response(context)
+        except Exception as e:
+            context = self.get_context_data(**kwargs)
+            context['message'] = f'Error sending email: {str(e)}'
+            context['message_type'] = 'error'
+            return self.render_to_response(context)

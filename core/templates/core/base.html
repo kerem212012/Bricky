@@ -27,7 +27,7 @@
                     <a href="{% url 'users:register' %}">Register</a>
                 {% endif %}
                 <span class="separator">|</span>
-                <a href="#help">Help</a>
+                <a href="{% url 'core:contact' %}">Help</a>
             </div>
         </div>
     </div>
@@ -51,7 +51,7 @@
                 {% endif %}
             </ul>
             <div class="nav-right">
-                <a href="#search" class="search-btn" onclick="openSearchModal(event)">
+                <a href="#search" class="search-btn" id="search-open-btn">
                     <i class="fas fa-search"></i>
                 </a>
                 <a href="{% url 'core:cart' %}" class="cart-btn">
@@ -101,21 +101,20 @@
                 <div class="footer-links">
                     <a href="{% url 'core:privacy_policy' %}">Privacy Policy</a>
                     <a href="{% url 'core:terms_of_service' %}">Terms of Service</a>
-                    <a href="{% url 'core:cookie_settings' %}">Cookie Settings</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <!-- Back to Top Button -->
-    <button class="back-to-top" id="back-to-top" onclick="backToTop()">
+    <button class="back-to-top" id="back-to-top">
         <i class="fas fa-arrow-up"></i>
     </button>
 
     <!-- Search Modal -->
     <div class="search-modal" id="search-modal">
         <div class="search-modal-content">
-            <button class="search-modal-close" onclick="closeSearchModal()">&times;</button>
+            <button class="search-modal-close" id="search-close-btn">&times;</button>
             <form method="get" action="{% url 'core:search' %}" class="search-modal-form">
                 <div class="search-modal-input-wrapper">
                     <input 
@@ -137,6 +136,7 @@
 
     <script src="{% static 'store/js/lego.js' %}"></script>
     <script src="{% static 'store/js/search-modal.js' %}"></script>
+    <script src="{% static 'core/js/newsletter.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

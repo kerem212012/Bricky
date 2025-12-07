@@ -1,0 +1,330 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Subscription Successful | Bricky LEGO Store{% endblock %}
+
+{% block extra_css %}
+<style>
+    .newsletter-success-container {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        padding: var(--spacing-lg) 0;
+        background: linear-gradient(135deg, var(--light) 0%, white 100%);
+    }
+
+    .success-card {
+        background: white;
+        border-radius: 12px;
+        padding: var(--spacing-lg);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .success-icon {
+        font-size: 80px;
+        color: #4caf50;
+        margin-bottom: var(--spacing);
+        animation: scaleIn 0.6s ease;
+    }
+
+    @keyframes scaleIn {
+        from {
+            transform: scale(0);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .success-header h1 {
+        font-size: 32px;
+        color: var(--text-dark);
+        margin-bottom: var(--spacing);
+    }
+
+    .success-message {
+        font-size: 16px;
+        color: var(--text-light);
+        line-height: 1.6;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .confirmation-details {
+        background: var(--light);
+        padding: var(--spacing-lg);
+        border-radius: 8px;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing);
+    }
+
+    .detail-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .detail-icon {
+        width: 40px;
+        height: 40px;
+        background: #4caf50;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .detail-content {
+        text-align: left;
+    }
+
+    .detail-content h4 {
+        margin: 0;
+        color: var(--text-dark);
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .detail-content p {
+        margin: 4px 0 0 0;
+        color: var(--text-light);
+        font-size: 13px;
+    }
+
+    .next-steps {
+        background: #e7f3ff;
+        border-left: 4px solid var(--primary);
+        padding: var(--spacing-lg);
+        border-radius: 6px;
+        margin-bottom: var(--spacing-lg);
+        text-align: left;
+    }
+
+    .next-steps h3 {
+        margin: 0 0 var(--spacing) 0;
+        color: var(--primary);
+        font-size: 16px;
+    }
+
+    .next-steps ol {
+        margin: 0;
+        padding-left: 20px;
+        color: var(--text-light);
+        font-size: 14px;
+    }
+
+    .next-steps li {
+        margin-bottom: var(--spacing-sm);
+        line-height: 1.5;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: var(--spacing);
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary-link,
+    .btn-secondary-link {
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-block;
+        transition: var(--transition);
+        border: 2px solid;
+    }
+
+    .btn-primary-link {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .btn-primary-link:hover {
+        background: #3d5a9e;
+        border-color: #3d5a9e;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary-link {
+        background: white;
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .btn-secondary-link:hover {
+        background: var(--light);
+        transform: translateY(-2px);
+    }
+
+    .newsletter-info {
+        background: var(--light);
+        padding: var(--spacing-lg);
+        border-radius: 8px;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .newsletter-info h3 {
+        margin: 0 0 var(--spacing) 0;
+        color: var(--text-dark);
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .info-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+        font-size: 13px;
+        color: var(--text-light);
+        line-height: 1.5;
+    }
+
+    .info-list i {
+        color: #4caf50;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+        .newsletter-success-container {
+            padding: var(--spacing-md) 0;
+        }
+
+        .success-card {
+            padding: var(--spacing-md);
+        }
+
+        .success-header h1 {
+            font-size: 24px;
+        }
+
+        .success-icon {
+            font-size: 60px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-primary-link,
+        .btn-secondary-link {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="newsletter-success-container">
+    <div class="success-card">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+
+        <div class="success-header">
+            <h1>Welcome to Bricky Newsletter!</h1>
+        </div>
+
+        <p class="success-message">
+            You've successfully subscribed to our newsletter. Thank you for joining our community of LEGO enthusiasts!
+        </p>
+
+        <div class="confirmation-details">
+            <div class="detail-item">
+                <div class="detail-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="detail-content">
+                    <h4>Confirmation Email Sent</h4>
+                    <p>Check your inbox for a confirmation email</p>
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-icon">
+                    <i class="fas fa-gift"></i>
+                </div>
+                <div class="detail-content">
+                    <h4>Exclusive Offers Incoming</h4>
+                    <p>Get access to exclusive discounts and early sales</p>
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="detail-content">
+                    <h4>Stay Updated</h4>
+                    <p>Never miss new product announcements and updates</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="next-steps">
+            <h3>What's Next?</h3>
+            <ol>
+                <li>Look for a confirmation email in your inbox</li>
+                <li>Check your spam folder if you don't see it</li>
+                <li>Confirm your subscription by clicking the link</li>
+                <li>Start receiving exclusive Bricky updates!</li>
+            </ol>
+        </div>
+
+        <div class="newsletter-info">
+            <h3>Newsletter Details</h3>
+            <ul class="info-list">
+                <li>
+                    <i class="fas fa-check"></i>
+                    <span><strong>Frequency:</strong> 2-3 emails per month</span>
+                </li>
+                <li>
+                    <i class="fas fa-check"></i>
+                    <span><strong>Content:</strong> Exclusive deals, new releases, and building tips</span>
+                </li>
+                <li>
+                    <i class="fas fa-check"></i>
+                    <span><strong>Unsubscribe:</strong> You can unsubscribe anytime with one click</span>
+                </li>
+                <li>
+                    <i class="fas fa-check"></i>
+                    <span><strong>Privacy:</strong> We respect your email and never spam</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{% url 'core:shop' %}" class="btn-primary-link">
+                <i class="fas fa-shopping-bag"></i> Continue Shopping
+            </a>
+            <a href="{% url 'core:index' %}" class="btn-secondary-link">
+                <i class="fas fa-home"></i> Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, DetailView, TemplateView, View
+from django.views.generic import ListView, DetailView, TemplateView, View, CreateView
 from django.db.models import Count, Sum, Q
 from django.utils import timezone
 from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.urls import reverse_lazy
 from decimal import Decimal
 from datetime import timedelta
 import json
@@ -12,6 +13,8 @@ import json
 from users.models import CustomUser
 from orders.models import Order, Customer, OrderElement
 from store.models import Product, Category, Cart, CartItem
+from core.models import ContactMessage, NewsletterSubscription
+from core.forms import ContactForm, NewsletterSubscriptionForm
 
 
 class CategoryView(ListView):
@@ -223,13 +226,6 @@ class TermsOfServiceView(TemplateView):
     template_name = 'core/terms_of_service.html'
 
 
-class CookieSettingsView(TemplateView):
-    """
-    View for displaying the Cookie Settings page
-    """
-    template_name = 'core/cookie_settings.html'
-
-
 class AboutView(TemplateView):
     """
     View for displaying the About page
@@ -239,9 +235,36 @@ class AboutView(TemplateView):
 
 class ContactView(TemplateView):
     """
-    View for displaying the Contact page
+    View for displaying and handling the Contact page form
     """
     template_name = 'core/contact.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = ContactForm()
+        context['subject_choices'] = ContactMessage.SubjectChoice.choices
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        """Handle form submission"""
+        form = ContactForm(request.POST)
+        
+        if form.is_valid():
+            # Save the contact message
+            contact_message = form.save()
+            
+            messages.success(
+                request,
+                f'Thank you for your message! We will get back to you at {contact_message.email} within 24 business hours.'
+            )
+            
+            # Redirect to same page to clear form
+            return redirect('core:contact')
+        else:
+            # Return with form errors
+            context = self.get_context_data(**kwargs)
+            context['form'] = form
+            return self.render_to_response(context)
 
 
 class NewReleasesView(TemplateView):
@@ -436,11 +459,39 @@ class AddToCartView(LoginRequiredMixin, View):
     login_url = 'users:login'
 
     def post(self, request, *args, **kwargs):
-        product_id = request.POST.get('product_id')
-        quantity = int(request.POST.get('quantity', 1))
-        
         try:
-            product = Product.objects.get(id=product_id, is_active=True)
+            product_id = request.POST.get('product_id')
+            
+            # Validate product_id
+            if not product_id:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Product ID is required'
+                }, status=400)
+            
+            # Get quantity with proper error handling
+            try:
+                quantity = int(request.POST.get('quantity', 1))
+            except (ValueError, TypeError):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Invalid quantity value'
+                }, status=400)
+            
+            # Validate quantity
+            if quantity < 1:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Quantity must be at least 1'
+                }, status=400)
+            
+            try:
+                product = Product.objects.get(id=product_id, is_active=True)
+            except Product.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Product not found'
+                }, status=404)
             
             # Validate stock
             if product.stock < quantity:
@@ -458,7 +509,6 @@ class AddToCartView(LoginRequiredMixin, View):
                 # Item already in cart, update quantity
                 cart_item.quantity += quantity
                 cart_item.save()
-                item_created = False
             except CartItem.DoesNotExist:
                 # Create new cart item
                 cart_item = CartItem.objects.create(
@@ -467,7 +517,6 @@ class AddToCartView(LoginRequiredMixin, View):
                     price=product.price,
                     quantity=quantity
                 )
-                item_created = True
             
             return JsonResponse({
                 'success': True,
@@ -476,11 +525,15 @@ class AddToCartView(LoginRequiredMixin, View):
                 'cart_total': str(cart.get_total_price())
             })
         
-        except Product.DoesNotExist:
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f'Error in AddToCartView: {str(e)}', exc_info=True)
             return JsonResponse({
                 'success': False,
-                'message': 'Product not found'
-            }, status=404)
+                'message': 'An error occurred while adding to cart'
+            }, status=500)
+
 
 
 class RemoveFromCartView(LoginRequiredMixin, View):
@@ -490,9 +543,16 @@ class RemoveFromCartView(LoginRequiredMixin, View):
     login_url = 'users:login'
 
     def post(self, request, *args, **kwargs):
-        cart_item_id = request.POST.get('cart_item_id')
-        
         try:
+            # Get cart_item_id from POST data
+            cart_item_id = request.POST.get('cart_item_id')
+            
+            if not cart_item_id:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Cart item ID is required'
+                }, status=400)
+            
             cart_item = CartItem.objects.get(id=cart_item_id, cart__user=request.user)
             cart = cart_item.cart
             product_name = cart_item.product.name
@@ -510,6 +570,11 @@ class RemoveFromCartView(LoginRequiredMixin, View):
                 'success': False,
                 'message': 'Item not found in cart'
             }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error: {str(e)}'
+            }, status=500)
 
 
 class UpdateCartItemView(LoginRequiredMixin, View):
@@ -567,12 +632,15 @@ class ClearCartView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         try:
+            # Get or create cart for user
             cart = Cart.objects.get(user=request.user)
-            cart.items.all().delete()
+            
+            # Delete all items in cart
+            CartItem.objects.filter(cart=cart).delete()
             
             return JsonResponse({
                 'success': True,
-                'message': 'Cart cleared',
+                'message': 'Cart cleared successfully',
                 'cart_count': 0,
                 'cart_total': '0.00'
             })
@@ -582,6 +650,11 @@ class ClearCartView(LoginRequiredMixin, View):
                 'success': False,
                 'message': 'Cart not found'
             }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error clearing cart: {str(e)}'
+            }, status=500)
 
 
 class CheckoutView(LoginRequiredMixin, TemplateView):
@@ -696,3 +769,92 @@ class OrderConfirmationView(LoginRequiredMixin, DetailView):
         
         return context
 
+
+class NewsletterSubscribeView(CreateView):
+    """
+    View for subscribing to the newsletter
+    """
+    model = NewsletterSubscription
+    form_class = NewsletterSubscriptionForm
+    template_name = 'core/newsletter_subscribe.html'
+    success_url = reverse_lazy('core:newsletter_success')
+
+    def form_valid(self, form):
+        """Handle successful form submission"""
+        response = super().form_valid(form)
+        messages.success(
+            self.request,
+            'Thank you for subscribing to our newsletter! You\'ll receive updates soon.'
+        )
+        return response
+
+    def form_invalid(self, form):
+        """Handle form errors"""
+        for field, errors in form.errors.items():
+            for error in errors:
+                messages.error(self.request, f'{error}')
+        return self.render_to_response(self.get_context_data(form=form))
+
+
+class NewsletterSubscribeAjaxView(View):
+    """
+    AJAX view for subscribing to the newsletter
+    """
+    def post(self, request):
+        """Handle AJAX POST request"""
+        try:
+            data = json.loads(request.body)
+            email = data.get('email', '').strip().lower()
+
+            if not email:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Email is required.'
+                }, status=400)
+
+            # Check if already subscribed
+            if NewsletterSubscription.objects.filter(email=email, status='active').exists():
+                return JsonResponse({
+                    'success': False,
+                    'message': 'This email is already subscribed to our newsletter.'
+                }, status=400)
+
+            # Create subscription
+            subscription, created = NewsletterSubscription.objects.get_or_create(
+                email=email,
+                defaults={'status': 'active'}
+            )
+
+            if not created and subscription.status == 'unsubscribed':
+                # Reactivate unsubscribed email
+                subscription.status = 'active'
+                subscription.unsubscribed_at = None
+                subscription.save()
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Thank you for subscribing to our newsletter!'
+            }, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid request format.'
+            }, status=400)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': 'An error occurred. Please try again.'
+            }, status=500)
+
+
+class NewsletterSuccessView(TemplateView):
+    """
+    Success page after newsletter subscription
+    """
+    template_name = 'core/newsletter_success.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Newsletter Subscription Successful'
+        return context

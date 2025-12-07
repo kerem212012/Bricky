@@ -28,12 +28,7 @@
                     </p>
                     <div class="category-stats">
                         <div class="stat">
-                            <span class="stat-number">{{ products_count }}</span>
-                            <span class="stat-label">Products</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number">${{ min_price|floatformat:2 }}</span>
-                            <span class="stat-label">From</span>
+                            <span class="stat-number">{{ products_count }} Products</span>
                         </div>
                     </div>
                 </div>
@@ -99,7 +94,7 @@
                             </button>
                         </div>
 
-                        <select name="sort" class="sort-dropdown" onchange="updateSort(this.value)">
+                        <select name="sort" class="sort-dropdown" id="sort-dropdown">
                             <option value="">Sort By</option>
                             <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
                             <option value="price-low" {% if sort == 'price-low' %}selected{% endif %}>Price: Low to High</option>
@@ -121,9 +116,6 @@
                                     <i class="fas fa-cube"></i>
                                 </div>
                             {% endif %}
-                            <div class="product-overlay">
-                                <button class="btn-quick-view" onclick="return false;">Quick View</button>
-                            </div>
                             {% if product.stock > 0 %}
                                 <span class="stock-badge in-stock">In Stock</span>
                             {% else %}
@@ -144,9 +136,6 @@
                             </div>
                             <div class="product-info">
                                 <span class="product-price">${{ product.price }}</span>
-                                <button class="btn-cart" onclick="addToCart(event, '{{ product.id }}')">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </button>
                             </div>
                         </div>
                     </a>
@@ -930,106 +919,19 @@
             gap: var(--spacing-sm);
         }
     }
-</style>
+}
 
+<script src="{% static 'store/js/category.js' %}"></script>
 <script>
-    function updateSort(value) {
-        if (value) {
-            const url = new URL(window.location);
-            url.searchParams.set('sort', value);
-            window.location.href = url.toString();
+    // Initialize sort dropdown listener
+    document.addEventListener('DOMContentLoaded', function() {
+        const sortDropdown = document.getElementById('sort-dropdown');
+        if (sortDropdown) {
+            sortDropdown.addEventListener('change', function() {
+                updateSort(this.value);
+            });
         }
-    }
-
-    document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            
-            const view = this.dataset.view;
-            const grid = document.getElementById('products-view');
-            
-            if (view === 'list') {
-                grid.classList.add('list-view');
-            } else {
-                grid.classList.remove('list-view');
-            }
-        });
     });
-
-    function addToCart(e, productId) {
-        e.preventDefault();
-        
-        {% if user.is_authenticated %}
-        const form = new FormData();
-        form.append('product_id', productId);
-        form.append('quantity', 1);
-
-        fetch("{% url 'core:add_to_cart' %}", {
-            method: 'POST',
-            body: form,
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showNotification(data.message, 'success');
-                updateCartCount(data.cart_count);
-            } else {
-                showNotification(data.message, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification('Error adding to cart', 'error');
-        });
-        {% else %}
-        window.location.href = "{% url 'users:login' %}";
-        {% endif %}
-    }
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-    function updateCartCount(count) {
-        const cartCount = document.querySelector('.cart-count');
-        if (cartCount) {
-            cartCount.textContent = count;
-        }
-    }
-
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.textContent = message;
-        notification.style.cssText = `
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: ${type === 'success' ? '#4caf50' : type === 'error' ? '#ff4444' : '#2196F3'};
-            color: white;
-            padding: 16px 24px;
-            border-radius: 6px;
-            z-index: 1000;
-            animation: slideIn 0.3s ease;
-        `;
-        document.body.appendChild(notification);
-        setTimeout(() => notification.remove(), 3000);
-    }
 </script>
 {% endblock %}
 

@@ -11,45 +11,93 @@
             <p>We'd love to hear from you. Get in touch with our team!</p>
         </div>
 
+        <!-- Messages Display -->
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <div class="contact-content">
             <!-- Contact Form -->
             <div class="contact-form-section">
                 <h2>Send us a Message</h2>
-                <form method="post" class="contact-form" id="contact-form">
+                <form method="post" class="contact-form" id="contact-form" novalidate>
                     {% csrf_token %}
                     
                     <div class="form-group">
-                        <label for="name">Full Name *</label>
-                        <input type="text" id="name" name="name" required placeholder="Your name">
+                        <label for="{{ form.name.id_for_label }}">{{ form.name.label }} *</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="form-error">
+                                {% for error in form.name.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="form-group">
-                        <label for="email">Email Address *</label>
-                        <input type="email" id="email" name="email" required placeholder="your@email.com">
+                        <label for="{{ form.email.id_for_label }}">{{ form.email.label }} *</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="form-error">
+                                {% for error in form.email.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="form-group">
-                        <label for="phone">Phone Number</label>
-                        <input type="tel" id="phone" name="phone" placeholder="+90 (XXX) XXX-XXXX">
+                        <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <div class="form-error">
+                                {% for error in form.phone.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="form-group">
-                        <label for="subject">Subject *</label>
-                        <select id="subject" name="subject" required>
-                            <option value="">Select a subject</option>
-                            <option value="general">General Inquiry</option>
-                            <option value="order">Order Question</option>
-                            <option value="shipping">Shipping Issue</option>
-                            <option value="return">Return/Refund</option>
-                            <option value="partnership">Partnership Opportunity</option>
-                            <option value="other">Other</option>
-                        </select>
+                        <label for="{{ form.subject.id_for_label }}">{{ form.subject.label }} *</label>
+                        {{ form.subject }}
+                        {% if form.subject.errors %}
+                            <div class="form-error">
+                                {% for error in form.subject.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="form-group">
-                        <label for="message">Message *</label>
-                        <textarea id="message" name="message" required placeholder="Tell us how we can help..." rows="6"></textarea>
+                        <label for="{{ form.message.id_for_label }}">{{ form.message.label }} *</label>
+                        {{ form.message }}
+                        <small class="form-text">Minimum 10 characters</small>
+                        {% if form.message.errors %}
+                            <div class="form-error">
+                                {% for error in form.message.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
 
                     <button type="submit" class="btn-primary">Send Message</button>
                 </form>
@@ -164,188 +212,5 @@
     </div>
 </div>
 
-<style>
-    .contact-page-container {
-        padding: var(--spacing-lg) 0;
-        background: white;
-    }
-
-    .contact-header {
-        text-align: center;
-        margin-bottom: var(--spacing-lg);
-    }
-
-    .contact-header h1 {
-        font-size: 36px;
-        color: var(--text-dark);
-        margin-bottom: var(--spacing);
-    }
-
-    .contact-header p {
-        font-size: 18px;
-        color: var(--text-light);
-    }
-
-    .contact-content {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--spacing-lg);
-        margin-bottom: var(--spacing-lg);
-    }
-
-    .contact-form-section h2,
-    .contact-info-section h2 {
-        font-size: 24px;
-        margin-bottom: var(--spacing-md);
-        color: var(--text-dark);
-    }
-
-    .contact-form {
-        background: var(--light);
-        padding: var(--spacing-lg);
-        border-radius: 12px;
-    }
-
-    .form-group {
-        margin-bottom: var(--spacing-md);
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: var(--spacing-sm);
-        font-weight: 600;
-        color: var(--text-dark);
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        width: 100%;
-        padding: 12px 16px;
-        border: 2px solid var(--border);
-        border-radius: 6px;
-        font-size: 14px;
-        font-family: inherit;
-        transition: var(--transition);
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(67, 97, 207, 0.1);
-    }
-
-    .contact-form .btn-primary {
-        width: 100%;
-        margin-top: var(--spacing);
-    }
-
-    .info-card {
-        background: white;
-        padding: var(--spacing-md);
-        margin-bottom: var(--spacing-md);
-        border-left: 4px solid var(--primary);
-        border-radius: 6px;
-        display: flex;
-        gap: var(--spacing-md);
-    }
-
-    .info-icon {
-        font-size: 28px;
-        color: var(--primary);
-        flex-shrink: 0;
-        width: 40px;
-        text-align: center;
-    }
-
-    .info-content h3 {
-        margin: 0 0 var(--spacing-sm) 0;
-        font-size: 16px;
-        color: var(--text-dark);
-    }
-
-    .info-content p {
-        margin: 0;
-        color: var(--text-light);
-        font-size: 14px;
-        line-height: 1.6;
-    }
-
-    .info-content a {
-        color: var(--primary);
-        text-decoration: none;
-        transition: var(--transition);
-    }
-
-    .info-content a:hover {
-        text-decoration: underline;
-    }
-
-    .faq-section {
-        margin-top: var(--spacing-lg);
-        padding-top: var(--spacing-lg);
-        border-top: 2px solid var(--border);
-    }
-
-    .faq-section h2 {
-        text-align: center;
-        font-size: 28px;
-        margin-bottom: var(--spacing-lg);
-    }
-
-    .faq-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: var(--spacing-lg);
-    }
-
-    .faq-item {
-        background: var(--light);
-        padding: var(--spacing-md);
-        border-radius: 8px;
-        transition: var(--transition);
-    }
-
-    .faq-item:hover {
-        box-shadow: var(--shadow-sm);
-    }
-
-    .faq-item h3 {
-        margin: 0 0 var(--spacing) 0;
-        font-size: 16px;
-        color: var(--text-dark);
-    }
-
-    .faq-item h3 i {
-        color: var(--primary);
-        margin-right: var(--spacing-sm);
-    }
-
-    .faq-item p {
-        margin: 0;
-        color: var(--text-light);
-        font-size: 14px;
-        line-height: 1.6;
-    }
-
-    @media (max-width: 768px) {
-        .contact-header h1 {
-            font-size: 24px;
-        }
-
-        .contact-content {
-            grid-template-columns: 1fr;
-        }
-
-        .contact-form {
-            padding: var(--spacing-md);
-        }
-
-        .faq-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'core/css/contact.css' %}">
 {% endblock %}

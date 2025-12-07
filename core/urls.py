@@ -14,8 +14,12 @@ urlpatterns = [
     path('new-releases/', views.NewReleasesView.as_view(), name='new_releases'),
     path('privacy-policy/', views.PrivacyPolicyView.as_view(), name='privacy_policy'),
     path('terms-of-service/', views.TermsOfServiceView.as_view(), name='terms_of_service'),
-    path('cookie-settings/', views.CookieSettingsView.as_view(), name='cookie_settings'),
     path('search/', views.SearchView.as_view(), name='search'),
+    
+    # Newsletter URLs
+    path('newsletter/subscribe/', views.NewsletterSubscribeView.as_view(), name='newsletter_subscribe'),
+    path('newsletter/subscribe-ajax/', views.NewsletterSubscribeAjaxView.as_view(), name='newsletter_subscribe_ajax'),
+    path('newsletter/success/', views.NewsletterSuccessView.as_view(), name='newsletter_success'),
     
     # Cart & Checkout URLs
     path('cart/', views.CartView.as_view(), name='cart'),

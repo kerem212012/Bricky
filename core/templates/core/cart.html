@@ -12,7 +12,7 @@
     <!-- Page Header -->
     <section class="page-header">
         <div class="container">
-            <h1>Shopping Cart</h1>
+            <h1><i class="fas fa-shopping-cart"></i> Shopping Cart</h1>
             <p class="breadcrumb">
                 <a href="{% url 'core:index' %}">Home</a> / 
                 <span>Shopping Cart</span>
@@ -25,13 +25,13 @@
         <div class="cart-layout">
             <!-- Cart Items -->
             <div class="cart-section">
-                <div style="padding: 10px; background: #e3f2fd; border-radius: 4px; margin-bottom: 20px; font-size: 12px;">
-                    Logged in as: <strong>{{ user.username }}</strong> | Cart ID: <strong>{{ cart.id }}</strong> | Items: <strong>{{ total_items }}</strong>
+                <div style="padding: 12px 16px; background: #e3f2fd; border-radius: 6px; margin-bottom: 20px; font-size: 12px; border-left: 4px solid #2196f3;">
+                    <i class="fas fa-info-circle"></i> Logged in as: <strong>{{ user.username }}</strong> | Items: <strong>{{ total_items }}</strong>
                 </div>
                 {% if cart_items %}
                 <div class="cart-header">
-                    <h2>Cart Items <span class="item-count">({{ total_items }})</span></h2>
-                    <button class="btn-clear-cart" onclick="clearCart()">Clear Cart</button>
+                    <h2><i class="fas fa-box"></i> Cart Items <span class="item-count">({{ total_items }})</span></h2>
+                    <button class="btn-clear-cart" id="clear-cart-btn"><i class="fas fa-trash-alt"></i> Clear Cart</button>
                 </div>
 
                 <div class="cart-items-table">
@@ -47,7 +47,7 @@
                     <div class="cart-item" data-item-id="{{ item.id }}">
                         <div class="col-product">
                             <div class="product-info">
-                                {% if item.product.picture %}
+                                {% if item.product.picture and item.product.picture.name != 'products/default.png' %}
                                     <img src="{{ item.product.picture.url }}" alt="{{ item.product.name }}" class="product-thumb">
                                 {% else %}
                                     <div class="product-thumb-placeholder">
@@ -56,7 +56,7 @@
                                 {% endif %}
                                 <div class="product-details">
                                     <a href="{{ item.product.get_absolute_url }}" class="product-name">{{ item.product.name }}</a>
-                                    <p class="product-category">{{ item.product.category.title }}</p>
+                                    <p class="product-category"><i class="fas fa-tag"></i> {{ item.product.category.title }}</p>
                                 </div>
                             </div>
                         </div>
@@ -65,13 +65,13 @@
 
                         <div class="col-quantity">
                             <div class="quantity-control">
-                                <button class="qty-btn" onclick="updateQuantity('{{ item.id }}', this.parentElement.querySelector('.qty-input').value - 1)">
+                                <button class="qty-btn qty-decrease" data-item-id="{{ item.id }}" title="Decrease quantity">
                                     <i class="fas fa-minus"></i>
                                 </button>
                                 <input type="number" class="qty-input" value="{{ item.quantity }}" 
                                     min="1" max="{{ item.product.stock }}" 
-                                    onchange="updateQuantity('{{ item.id }}', this.value)">
-                                <button class="qty-btn" onclick="updateQuantity('{{ item.id }}', this.parentElement.querySelector('.qty-input').value + 1)">
+                                    title="Edit quantity">
+                                <button class="qty-btn qty-increase" data-item-id="{{ item.id }}" title="Increase quantity">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -82,8 +82,8 @@
                         </div>
 
                         <div class="col-action">
-                            <button class="btn-remove" onclick="removeFromCart('{{ item.id }}')" title="Remove item">
-                                <i class="fas fa-trash"></i>
+                            <button class="btn-remove" data-item-id="{{ item.id }}" title="Remove this item from cart">
+                                <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
                     </div>
@@ -95,7 +95,7 @@
                     <i class="fas fa-shopping-cart"></i>
                     <h2>Your Cart is Empty</h2>
                     <p>Browse our collection and add some amazing LEGO sets to your cart!</p>
-                    <a href="{% url 'core:shop' %}" class="btn-primary">Continue Shopping</a>
+                    <a href="{% url 'core:shop' %}" class="btn-primary"> Continue Shopping</a>
                 </div>
                 {% endif %}
             </div>
@@ -103,7 +103,7 @@
             <!-- Cart Summary -->
             {% if cart_items %}
             <div class="cart-summary">
-                <h3>Order Summary</h3>
+                <h3><i class="fas fa-receipt"></i> Order Summary</h3>
 
                 <div class="summary-item">
                     <span>Subtotal</span>
@@ -111,12 +111,12 @@
                 </div>
 
                 <div class="summary-item">
-                    <span>Shipping</span>
+                    <span><i class="fas fa-truck"></i> Shipping</span>
                     <span class="shipping">${{ shipping_cost }}</span>
                 </div>
 
                 <div class="summary-item">
-                    <span>Tax (10%)</span>
+                    <span><i class="fas fa-percentage"></i> Tax (10%)</span>
                     <span class="tax">${{ tax }}</span>
                 </div>
 
@@ -127,20 +127,21 @@
                     <span class="grand-total">${{ grand_total }}</span>
                 </div>
 
-                <a href="{% url 'core:checkout' %}" class="btn-primary btn-checkout">Proceed to Checkout</a>
-
-                <a href="{% url 'core:shop' %}" class="btn-secondary">Continue Shopping</a>
+                <div class="checkout-buttons">
+                    <a href="{% url 'core:checkout' %}" class="btn-primary btn-checkout"><i class="fas fa-credit-card"></i> Proceed to Checkout</a>
+                    <a href="{% url 'core:shop' %}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Continue Shopping</a>
+                </div>
 
                 <!-- Promo Code -->
                 <div class="promo-section">
-                    <input type="text" placeholder="Enter promo code" class="promo-input">
-                    <button class="btn-apply-promo">Apply</button>
+                    <input type="text" placeholder="Enter promo code" class="promo-input" maxlength="20">
+                    <button class="btn-apply-promo" id="apply-promo-btn"><i class="fas fa-tag"></i></button>
                 </div>
 
                 <!-- Features -->
                 <div class="cart-features">
                     <div class="feature">
-                        <i class="fas fa-truck"></i>
+                        <i class="fas fa-shipping-fast"></i>
                         <span>Free shipping over $50</span>
                     </div>
                     <div class="feature">
@@ -151,6 +152,10 @@
                         <i class="fas fa-undo"></i>
                         <span>30-day returns</span>
                     </div>
+                    <div class="feature">
+                        <i class="fas fa-headset"></i>
+                        <span>24/7 Support</span>
+                    </div>
                 </div>
             </div>
             {% endif %}
@@ -160,10 +165,11 @@
 
 <script src="{% static 'store/js/cart.js' %}"></script>
 <script>
-    // Initialize cart URLs for cart.js
-    const addToCartUrl = "{% url 'core:add_to_cart' %}";
-    const removeFromCartUrl = "{% url 'core:remove_from_cart' %}";
-    const updateCartUrl = "{% url 'core:update_cart' %}";
-    const clearCartUrl = "{% url 'core:clear_cart' %}";
+    // Set up Django URLs for AJAX calls
+    window.CART_URLS = {
+        'remove_from_cart': '{% url "core:remove_from_cart" %}',
+        'update_cart': '{% url "core:update_cart" %}',
+        'clear_cart': '{% url "core:clear_cart" %}'
+    };
 </script>
 {% endblock %}

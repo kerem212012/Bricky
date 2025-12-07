@@ -140,6 +140,9 @@ function setupBackToTop() {
             backToTopBtn.classList.remove('show');
         }
     });
+    
+    // Add click listener to back-to-top button
+    backToTopBtn.addEventListener('click', backToTop);
 }
 
 function backToTop() {

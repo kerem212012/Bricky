@@ -1,0 +1,54 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Resend Verification Email - Bricky LEGO Store{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'users/users.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Resend Verification Email</h2>
+        
+        {% if message %}
+        <div class="alert alert-{{ message_type|default:'info' }}">
+            {{ message }}
+        </div>
+        {% endif %}
+        
+        {% if not user.email_is_verified %}
+        <p>We'll send a new verification email to <strong>{{ user.email }}</strong></p>
+        
+        <form method="POST" class="auth-form">
+            {% csrf_token %}
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-envelope"></i> Send Verification Email
+            </button>
+        </form>
+        
+        <p class="help-text">
+            Check your email inbox and spam folder for the verification link.
+            The link will expire in 24 hours.
+        </p>
+        {% else %}
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            Your email has already been verified!
+        </div>
+        <a href="{% url 'users:profile' %}" class="btn-primary">
+            <i class="fas fa-user"></i> Go to Profile
+        </a>
+        {% endif %}
+        
+        <hr>
+        
+        <p class="text-center">
+            <a href="{% url 'users:profile' %}">Back to Profile</a>
+        </p>
+    </div>
+</div>
+
+<script src="{% static 'users/users.js' %}"></script>
+{% endblock %}

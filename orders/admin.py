@@ -1,5 +1,6 @@
 from django.contrib import admin
-from orders.models import Customer, Order, OrderElement
+from django.utils.html import format_html
+from orders.models import Customer, Order, OrderElement, Delivery
 
 
 class OrderElementInline(admin.TabularInline):
@@ -7,6 +8,32 @@ class OrderElementInline(admin.TabularInline):
     extra = 1
     readonly_fields = ['total_price']
     fields = ['product', 'price', 'quantity', 'total_price']
+
+
+class DeliveryInline(admin.TabularInline):
+    model = Delivery
+    extra = 0
+    readonly_fields = ['id', 'created_at', 'updated_at', 'status_badge']
+    fields = ['method', 'status_badge', 'tracking_number', 'estimated_delivery_date', 'actual_delivery_date']
+    can_delete = False
+
+    def status_badge(self, obj):
+        """Display delivery status as colored badge"""
+        status_colors = {
+            'pending': '#ffc107',
+            'in_transit': '#17a2b8',
+            'out_for_delivery': '#0dcaf0',
+            'delivered': '#28a745',
+            'failed': '#dc3545',
+            'returned': '#6c757d',
+        }
+        color = status_colors.get(obj.status, '#6c757d')
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold;">{}</span>',
+            color,
+            obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
 
 
 @admin.register(Customer)
@@ -30,7 +57,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ['status', 'registered_at', 'is_draft']
     search_fields = ['customer__user__username', 'address']
     readonly_fields = ['registered_at', 'id']
-    inlines = [OrderElementInline]
+    inlines = [OrderElementInline, DeliveryInline]
     fieldsets = (
         ('Customer Information', {
             'fields': ('customer', 'address', 'order_note')
@@ -47,6 +74,55 @@ class OrderAdmin(admin.ModelAdmin):
         }),
     )
 
+
+@admin.register(Delivery)
+class DeliveryAdmin(admin.ModelAdmin):
+    """
+    Admin interface for Delivery model
+    """
+    list_display = ['tracking_number', 'order', 'method', 'status_badge', 'estimated_delivery_date', 'actual_delivery_date']
+    list_filter = ['status', 'method', 'created_at']
+    search_fields = ['tracking_number', 'order__id', 'delivery_address']
+    readonly_fields = ['id', 'created_at', 'updated_at']
+    ordering = ['-created_at']
+
+    fieldsets = (
+        ('Delivery Information', {
+            'fields': ('order', 'tracking_number', 'method', 'status')
+        }),
+        ('Recipient Information', {
+            'fields': ('recipient_name', 'recipient_phone', 'delivery_address', 'delivery_notes')
+        }),
+        ('Delivery Details', {
+            'fields': ('estimated_delivery_date', 'actual_delivery_date', 'signature_required')
+        }),
+        ('Costs', {
+            'fields': ('delivery_cost', 'insurance', 'insurance_cost'),
+            'classes': ('collapse',)
+        }),
+        ('System Information', {
+            'fields': ('id', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def status_badge(self, obj):
+        """Display delivery status as colored badge"""
+        status_colors = {
+            'pending': '#ffc107',
+            'in_transit': '#17a2b8',
+            'out_for_delivery': '#0dcaf0',
+            'delivered': '#28a745',
+            'failed': '#dc3545',
+            'returned': '#6c757d',
+        }
+        color = status_colors.get(obj.status, '#6c757d')
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold;">{}</span>',
+            color,
+            obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
 
 @admin.register(OrderElement)
 class OrderElementAdmin(admin.ModelAdmin):
