@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class ContactMessage(models.Model):
@@ -131,3 +132,38 @@ class HelpArticle(models.Model):
             models.Index(fields=['category']),
         ]
 
+
+class Review(models.Model):
+    """
+    Model for product reviews
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    product = models.ForeignKey('store.Product', on_delete=models.CASCADE, related_name='reviews')
+    author = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, related_name='reviews')
+    title = models.CharField(max_length=255, db_index=True)
+    content = models.TextField()
+    rating = models.PositiveIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text='Rating from 1 to 5 stars'
+    )
+    is_approved = models.BooleanField(default=True, db_index=True)
+    helpful_count = models.PositiveIntegerField(default=0)
+    unhelpful_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"Review of {self.product.name} by {self.author.username}"
+
+    class Meta:
+        verbose_name = 'Product Review'
+        verbose_name_plural = 'Product Reviews'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['product']),
+            models.Index(fields=['author']),
+            models.Index(fields=['rating']),
+            models.Index(fields=['is_approved']),
+            models.Index(fields=['created_at']),
+        ]
+        unique_together = [['product', 'author']]  # One review per user per product

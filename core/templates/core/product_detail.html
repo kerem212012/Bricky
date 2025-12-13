@@ -5,10 +5,14 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'store/css/product-detail.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/review_messages.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="product-detail-container">
+    <!-- Review Messages -->
+    {% include 'core/review_messages.html' %}
+
     <!-- Breadcrumb -->
     <div class="container">
         <p class="breadcrumb">
@@ -51,11 +55,21 @@
                     <span class="category-badge">{{ product.category.title }}</span>
                     <div class="rating">
                         <div class="stars">
-                            {% for i in "12345" %}
-                            <i class="fas fa-star"></i>
-                            {% endfor %}
+                            {% if average_rating %}
+                                {% for i in "12345" %}
+                                    {% if i|add:"0" <= average_rating|add:"0.5" %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="fas fa-star" style="opacity: 0.3;"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                {% for i in "12345" %}
+                                    <i class="fas fa-star" style="opacity: 0.3;"></i>
+                                {% endfor %}
+                            {% endif %}
                         </div>
-                        <span class="rating-text">(42 reviews)</span>
+                        <span class="rating-text">({{ review_count }} review{{ review_count|pluralize }})</span>
                     </div>
                 </div>
 
@@ -186,64 +200,92 @@
             <!-- Reviews Tab -->
             <div id="reviews" class="tab-content">
                 <h3>Customer Reviews</h3>
-                <div class="reviews-container">
-                    <div class="review">
-                        <div class="review-header">
-                            <div class="reviewer-info">
-                                <strong>John Doe</strong>
-                                <span class="review-date">2 weeks ago</span>
+                {% if reviews %}
+                    <div class="reviews-container">
+                        {% for review in reviews %}
+                            <div class="review" id="review-{{ review.id }}">
+                                <div class="review-header">
+                                    <div class="reviewer-info">
+                                        <strong>{{ review.author.username }}</strong>
+                                        <span class="review-date">{{ review.created_at|date:"M d, Y" }}</span>
+                                    </div>
+                                    <div class="review-rating">
+                                        {% for i in "12345" %}
+                                            {% if i|add:"0" <= review.rating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="fas fa-star" style="opacity: 0.3;"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <h4>{{ review.title }}</h4>
+                                <p>{{ review.content }}</p>
+                                <div class="review-actions">
+                                    <button class="helpful-btn" data-review-id="{{ review.id }}" data-action="helpful">
+                                        <i class="fas fa-thumbs-up"></i> Helpful (<span class="helpful-count">{{ review.helpful_count }}</span>)
+                                    </button>
+                                    <button class="unhelpful-btn" data-review-id="{{ review.id }}" data-action="unhelpful">
+                                        <i class="fas fa-thumbs-down"></i> Unhelpful (<span class="unhelpful-count">{{ review.unhelpful_count }}</span>)
+                                    </button>
+                                </div>
                             </div>
-                            <div class="review-rating">
-                                {% for i in "12345" %}
-                                <i class="fas fa-star"></i>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <h4>Excellent product!</h4>
-                        <p>Great quality LEGO set. Highly recommend to all LEGO enthusiasts.</p>
+                        {% endfor %}
                     </div>
-
-                    <div class="review">
-                        <div class="review-header">
-                            <div class="reviewer-info">
-                                <strong>Jane Smith</strong>
-                                <span class="review-date">1 month ago</span>
-                            </div>
-                            <div class="review-rating">
-                                {% for i in "1234" %}
-                                <i class="fas fa-star"></i>
-                                {% endfor %}
-                                <i class="fas fa-star" style="opacity: 0.3;"></i>
-                            </div>
-                        </div>
-                        <h4>Good value for money</h4>
-                        <p>Good value. Arrived quickly and in perfect condition.</p>
+                {% else %}
+                    <div class="no-reviews">
+                        <p>No reviews yet. Be the first to review this product!</p>
                     </div>
-                </div>
+                {% endif %}
 
-                <div class="review-form">
-                    <h4>Leave a Review</h4>
-                    <form>
-                        <div class="form-group">
-                            <label>Your Rating</label>
-                            <div class="rating-input">
-                                {% for i in "12345" %}
-                                <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}">
-                                <label for="star{{ i }}"><i class="fas fa-star"></i></label>
-                                {% endfor %}
-                            </div>
+                {% if user.is_authenticated %}
+                    {% if not user_has_reviewed %}
+                        <div class="review-form">
+                            <h4>Leave a Review</h4>
+                            <form id="review-form-{{ product.id }}" method="post" action="{% url 'core:create_review' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                
+                                <div class="form-group">
+                                    <label>Your Rating</label>
+                                    <div class="rating-input" id="rating-input-{{ product.id }}">
+                                        {% for i in "12345" %}
+                                            <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}-{{ product.id }}">
+                                            <label for="star{{ i }}-{{ product.id }}" class="star-label"><i class="fas fa-star"></i></label>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>{{ review_form.title.label }}</label>
+                                    {{ review_form.title }}
+                                    {% if review_form.title.errors %}
+                                        <div class="form-error">{{ review_form.title.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>{{ review_form.content.label }}</label>
+                                    {{ review_form.content }}
+                                    {% if review_form.content.errors %}
+                                        <div class="form-error">{{ review_form.content.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <button type="submit" class="btn-primary">Submit Review</button>
+                                <div id="review-message" class="review-message" style="display:none; margin-top: 10px;"></div>
+                            </form>
                         </div>
-                        <div class="form-group">
-                            <label>Review Title</label>
-                            <input type="text" placeholder="Enter review title" required>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p>You have already reviewed this product. Thank you for your feedback!</p>
                         </div>
-                        <div class="form-group">
-                            <label>Your Review</label>
-                            <textarea placeholder="Share your experience..." rows="5" required></textarea>
-                        </div>
-                        <button type="submit" class="btn-primary">Submit Review</button>
-                    </form>
-                </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-info">
+                        <p><a href="{% url 'users:login' %}">Sign in</a> to leave a review.</p>
+                    </div>
+                {% endif %}
             </div>
 
             <!-- Shipping Tab -->
@@ -305,4 +347,5 @@
     const addToCartUrl = "{% url 'core:add_to_cart' %}";
 </script>
 <script src="{% static 'store/js/product-detail.js' %}"></script>
+<script src="{% static 'store/js/review-system.js' %}"></script>
 {% endblock %}

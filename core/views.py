@@ -13,8 +13,8 @@ import json
 from users.models import CustomUser
 from orders.models import Order, Customer, OrderElement
 from store.models import Product, Category, Cart, CartItem
-from core.models import ContactMessage, NewsletterSubscription
-from core.forms import ContactForm, NewsletterSubscriptionForm
+from core.models import ContactMessage, NewsletterSubscription, Review
+from core.forms import ContactForm, NewsletterSubscriptionForm, ReviewForm
 
 
 class CategoryView(ListView):
@@ -200,7 +200,7 @@ class ShopView(ListView):
 
 class ProductDetailView(DetailView):
     """
-    View for displaying a single product's details
+    View for displaying a single product's details with reviews
     """
     model = Product
     template_name = 'core/product_detail.html'
@@ -210,6 +210,32 @@ class ProductDetailView(DetailView):
     
     def get_queryset(self):
         return Product.objects.filter(is_active=True)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        product = self.get_object()
+        
+        # Get approved reviews
+        reviews = product.reviews.filter(is_approved=True).order_by('-created_at')
+        context['reviews'] = reviews
+        context['review_count'] = reviews.count()
+        
+        # Calculate average rating
+        if reviews.exists():
+            total_rating = sum(review.rating for review in reviews)
+            context['average_rating'] = total_rating / reviews.count()
+        else:
+            context['average_rating'] = 0
+        
+        # Check if user has already reviewed this product
+        if self.request.user.is_authenticated:
+            context['user_has_reviewed'] = product.reviews.filter(author=self.request.user).exists()
+            context['review_form'] = ReviewForm()
+        else:
+            context['user_has_reviewed'] = False
+            context['review_form'] = None
+        
+        return context
 
 
 class PrivacyPolicyView(TemplateView):
@@ -858,3 +884,93 @@ class NewsletterSuccessView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Newsletter Subscription Successful'
         return context
+
+
+class CreateReviewView(LoginRequiredMixin, CreateView):
+    """
+    View for creating a product review
+    """
+    model = Review
+    form_class = ReviewForm
+    template_name = 'core/create_review.html'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        """Handle review submission via AJAX"""
+        try:
+            product_id = request.POST.get('product_id')
+            product = get_object_or_404(Product, id=product_id, is_active=True)
+
+            # Check if user already reviewed this product
+            if Review.objects.filter(product=product, author=request.user).exists():
+                return JsonResponse({
+                    'success': False,
+                    'message': 'You have already reviewed this product.'
+                }, status=400)
+
+            form = ReviewForm(request.POST)
+            if form.is_valid():
+                review = form.save(commit=False)
+                review.product = product
+                review.author = request.user
+                review.save()
+
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Review submitted successfully! It will appear after moderation.',
+                    'review': {
+                        'author': review.author.username,
+                        'rating': review.rating,
+                        'title': review.title,
+                        'content': review.content,
+                        'created_at': review.created_at.strftime('%B %d, %Y')
+                    }
+                })
+            else:
+                errors = form.errors
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Please fix the errors below.',
+                    'errors': errors
+                }, status=400)
+
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'An error occurred: {str(e)}'
+            }, status=500)
+
+
+class ReviewHelpfulView(LoginRequiredMixin, View):
+    """
+    AJAX view to mark review as helpful or unhelpful
+    """
+    def post(self, request, review_id):
+        """Handle helpful/unhelpful marking"""
+        try:
+            review = get_object_or_404(Review, id=review_id)
+            action = request.POST.get('action')  # 'helpful' or 'unhelpful'
+
+            if action == 'helpful':
+                review.helpful_count += 1
+            elif action == 'unhelpful':
+                review.unhelpful_count += 1
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Invalid action.'
+                }, status=400)
+
+            review.save()
+
+            return JsonResponse({
+                'success': True,
+                'helpful_count': review.helpful_count,
+                'unhelpful_count': review.unhelpful_count
+            })
+
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'An error occurred: {str(e)}'
+            }, status=500)

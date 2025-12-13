@@ -1,0 +1,131 @@
+<!-- Review Success/Error Message Templates -->
+
+<!-- Success Message -->
+<div id="review-success-message" class="review-message alert alert-success" style="display: none;">
+    <div class="message-content">
+        <div class="message-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="message-text">
+            <h4>Thank You!</h4>
+            <p id="success-message-text">Your review has been submitted successfully!</p>
+        </div>
+        <button class="close-message" onclick="closeMessage(this)">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Error Message -->
+<div id="review-error-message" class="review-message alert alert-danger" style="display: none;">
+    <div class="message-content">
+        <div class="message-icon">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div class="message-text">
+            <h4>Error</h4>
+            <p id="error-message-text">An error occurred while submitting your review.</p>
+            <div id="error-details" style="display: none;">
+                <ul id="error-list"></ul>
+            </div>
+        </div>
+        <button class="close-message" onclick="closeMessage(this)">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Info Message (Already Reviewed) -->
+<div id="review-info-message" class="review-message alert alert-info" style="display: none;">
+    <div class="message-content">
+        <div class="message-icon">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="message-text">
+            <h4>Info</h4>
+            <p id="info-message-text">You have already reviewed this product.</p>
+        </div>
+        <button class="close-message" onclick="closeMessage(this)">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Moderation Notice -->
+<div id="review-moderation-message" class="review-message alert alert-warning" style="display: none;">
+    <div class="message-content">
+        <div class="message-icon">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="message-text">
+            <h4>Under Review</h4>
+            <p id="moderation-message-text">Your review has been submitted and will appear after moderation.</p>
+        </div>
+        <button class="close-message" onclick="closeMessage(this)">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+function closeMessage(button) {
+    button.closest('.review-message').style.display = 'none';
+}
+
+function showSuccessMessage(message = 'Your review has been submitted successfully!') {
+    const messageDiv = document.getElementById('review-success-message');
+    document.getElementById('success-message-text').textContent = message;
+    messageDiv.style.display = 'block';
+    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => {
+        messageDiv.style.display = 'none';
+    }, 5000);
+}
+
+function showErrorMessage(message = 'An error occurred while submitting your review.', errors = null) {
+    const messageDiv = document.getElementById('review-error-message');
+    document.getElementById('error-message-text').textContent = message;
+    
+    if (errors) {
+        const errorList = document.getElementById('error-list');
+        const errorDetails = document.getElementById('error-details');
+        errorList.innerHTML = '';
+        
+        for (const [field, errorArray] of Object.entries(errors)) {
+            if (Array.isArray(errorArray)) {
+                errorArray.forEach(error => {
+                    const li = document.createElement('li');
+                    li.textContent = `${field}: ${error}`;
+                    errorList.appendChild(li);
+                });
+            }
+        }
+        errorDetails.style.display = 'block';
+    } else {
+        document.getElementById('error-details').style.display = 'none';
+    }
+    
+    messageDiv.style.display = 'block';
+    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function showInfoMessage(message = 'You have already reviewed this product.') {
+    const messageDiv = document.getElementById('review-info-message');
+    document.getElementById('info-message-text').textContent = message;
+    messageDiv.style.display = 'block';
+    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => {
+        messageDiv.style.display = 'none';
+    }, 5000);
+}
+
+function showModerationMessage(message = 'Your review has been submitted and will appear after moderation.') {
+    const messageDiv = document.getElementById('review-moderation-message');
+    document.getElementById('moderation-message-text').textContent = message;
+    messageDiv.style.display = 'block';
+    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => {
+        messageDiv.style.display = 'none';
+    }, 5000);
+}
+</script>

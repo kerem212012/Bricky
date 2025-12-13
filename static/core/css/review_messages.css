@@ -1,0 +1,175 @@
+/* Review Message Styles */
+
+.review-message {
+    margin: var(--spacing-lg) 0;
+    border-radius: 8px;
+    overflow: hidden;
+    animation: slideDown 0.4s ease-out;
+}
+
+.review-message.alert {
+    border: none;
+    padding: 0;
+}
+
+.review-message .message-content {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+}
+
+.review-message .message-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.review-message.alert-success .message-icon {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+.review-message.alert-danger .message-icon {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+}
+
+.review-message.alert-warning .message-icon {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+}
+
+.review-message.alert-info .message-icon {
+    background: rgba(33, 150, 243, 0.2);
+    color: #2196f3;
+}
+
+.review-message .message-text {
+    flex: 1;
+}
+
+.review-message h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.review-message p {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.review-message ul {
+    margin: 8px 0 0 0;
+    padding-left: 20px;
+    font-size: 13px;
+}
+
+.review-message li {
+    margin: 4px 0;
+}
+
+.review-message .close-message {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: inherit;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.review-message .close-message:hover {
+    opacity: 1;
+}
+
+/* Success Message */
+.review-message.alert-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-left: 4px solid #4caf50;
+}
+
+.review-message.alert-success h4 {
+    color: #2e7d32;
+}
+
+/* Error Message */
+.review-message.alert-danger {
+    background: #ffebee;
+    color: #c62828;
+    border-left: 4px solid #f44336;
+}
+
+.review-message.alert-danger h4 {
+    color: #c62828;
+}
+
+/* Warning Message (Moderation) */
+.review-message.alert-warning {
+    background: #fff8e1;
+    color: #f57f17;
+    border-left: 4px solid #ffc107;
+}
+
+.review-message.alert-warning h4 {
+    color: #f57f17;
+}
+
+/* Info Message */
+.review-message.alert-info {
+    background: #e3f2fd;
+    color: #0d47a1;
+    border-left: 4px solid #2196f3;
+}
+
+.review-message.alert-info h4 {
+    color: #0d47a1;
+}
+
+/* Animations */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .review-message .message-content {
+        gap: var(--spacing-sm);
+    }
+
+    .review-message .message-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+    }
+
+    .review-message h4 {
+        font-size: 14px;
+    }
+
+    .review-message p {
+        font-size: 13px;
+    }
+}

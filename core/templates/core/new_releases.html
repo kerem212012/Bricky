@@ -66,7 +66,7 @@
                             <p class="release-description">{{ product.description|truncatewords:15 }}</p>
                             <div class="release-price">${{ product.price }}</div>
                             {% if product.status == 'C' %}
-                                <button class="btn-secondary" style="width: 100%;">Notify Me</button>
+                                <button class="btn-secondary" style="width: 100%;">Coming Soon</button>
                             {% else %}
                                 <a href="{{ product.get_absolute_url }}" class="btn-primary" style="width: 100%; display: block; text-align: center; text-decoration: none;">View Details</a>
                             {% endif %}

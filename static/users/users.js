@@ -146,24 +146,40 @@ class PasswordToggle {
     init() {
         const passwordFields = document.querySelectorAll('input[type="password"]');
         passwordFields.forEach((field, index) => {
+            // Create wrapper for better positioning
+            const wrapper = document.createElement('div');
+            wrapper.className = 'password-field-wrapper';
+            
+            // Create toggle button with better accessibility
             const toggleBtn = document.createElement('button');
             toggleBtn.type = 'button';
             toggleBtn.className = 'password-toggle-btn';
+            toggleBtn.setAttribute('aria-label', 'Toggle password visibility');
+            toggleBtn.setAttribute('title', 'Show/Hide password');
             toggleBtn.innerHTML = '<i class="fas fa-eye"></i>';
+            
             toggleBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 this.togglePassword(field, toggleBtn);
             });
-            field.parentElement.appendChild(toggleBtn);
+            
+            // Move field into wrapper and add button
+            field.parentElement.insertBefore(wrapper, field);
+            wrapper.appendChild(field);
+            wrapper.appendChild(toggleBtn);
         });
     }
 
     togglePassword(field, btn) {
         if (field.type === 'password') {
             field.type = 'text';
+            btn.classList.add('password-visible');
+            btn.setAttribute('aria-label', 'Hide password');
             btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
         } else {
             field.type = 'password';
+            btn.classList.remove('password-visible');
+            btn.setAttribute('aria-label', 'Show password');
             btn.innerHTML = '<i class="fas fa-eye"></i>';
         }
     }
@@ -180,6 +196,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize password toggle
     new PasswordToggle();
 
+    // Mark inputs with errors
+    markInputsWithErrors();
+
     // Smooth scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', (e) => {
@@ -191,6 +210,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+// Mark input fields that have error messages
+function markInputsWithErrors() {
+    const formGroups = document.querySelectorAll('.form-group');
+    formGroups.forEach(group => {
+        const input = group.querySelector('input');
+        const errorMessage = group.querySelector('.error-message');
+        
+        if (input && errorMessage) {
+            input.classList.add('error-field');
+            input.setAttribute('aria-invalid', 'true');
+        }
+    });
+}
 
 // Show notification message
 function showNotification(message, type = 'success', duration = 4000) {

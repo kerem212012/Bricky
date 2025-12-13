@@ -34,4 +34,8 @@ urlpatterns = [
     # API URLs
     path('api/search/', views.search_api, name='search_api'),
     path('api/autocomplete/', views.search_autocomplete, name='search_autocomplete'),
+    
+    # Review URLs
+    path('review/create/', views.CreateReviewView.as_view(), name='create_review'),
+    path('review/<uuid:review_id>/helpful/', views.ReviewHelpfulView.as_view(), name='review_helpful'),
 ]
