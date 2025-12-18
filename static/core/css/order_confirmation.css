@@ -1,3 +1,22 @@
+/* Browse Products Link Styles */
+.browse-products-text {
+    text-align: center;
+    color: var(--text-light);
+    grid-column: 1 / -1;
+}
+
+.browse-products-text a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.browse-products-text a:hover {
+    text-decoration: underline;
+    color: var(--primary-hover);
+}
+
 .confirmation-page-container {
     background: white;
     min-height: 100vh;

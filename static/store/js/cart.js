@@ -51,8 +51,9 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// Update cart count in navbar
+// Update cart count in navbar and item count display
 function updateCartCount(count) {
+    // Update navbar cart count
     const cartCount = document.querySelector('.cart-count');
     if (cartCount) {
         cartCount.textContent = count;
@@ -60,6 +61,18 @@ function updateCartCount(count) {
         setTimeout(() => {
             cartCount.style.animation = 'none';
         }, 400);
+    }
+    
+    // Update item count in cart page
+    const itemCount = document.querySelector('.item-count');
+    if (itemCount) {
+        itemCount.textContent = '(' + count + ')';
+    }
+    
+    // Update info banner
+    const infoBanner = document.querySelector('[style*="background: #e3f2fd"]');
+    if (infoBanner) {
+        infoBanner.innerHTML = infoBanner.innerHTML.replace(/Items: <strong>\d+<\/strong>/g, 'Items: <strong>' + count + '</strong>');
     }
 }
 
@@ -117,6 +130,7 @@ function removeFromCart(cartItemId) {
 function updateQuantity(cartItemId, newQuantity) {
     const qtyInput = document.querySelector(`[data-item-id="${cartItemId}"] .qty-input`);
     const itemElement = document.querySelector(`[data-item-id="${cartItemId}"]`);
+    const oldQuantity = parseInt(qtyInput.value);
     
     newQuantity = parseInt(newQuantity);
     
@@ -125,7 +139,15 @@ function updateQuantity(cartItemId, newQuantity) {
         return;
     }
 
-    // Add loading state
+    if (newQuantity === oldQuantity) {
+        return; // No change needed
+    }
+
+    // Store original quantity for potential revert
+    const originalQuantity = oldQuantity;
+    
+    // Update UI immediately (optimistic update)
+    qtyInput.value = newQuantity;
     itemElement.style.opacity = '0.7';
     itemElement.style.pointerEvents = 'none';
 
@@ -148,8 +170,8 @@ function updateQuantity(cartItemId, newQuantity) {
             itemTotalElement.textContent = '$' + parseFloat(data.item_total).toFixed(2);
             itemTotalElement.style.animation = 'slideUp 0.3s ease';
             
-            // Update cart total
-            updateCartSummary(data.cart_total);
+            // Update all totals
+            updateCartSummary(data);
             updateCartCount(data.cart_count);
             
             // Remove loading state
@@ -158,27 +180,62 @@ function updateQuantity(cartItemId, newQuantity) {
             
             showNotification('Cart updated successfully', 'success');
         } else {
-            // Revert quantity
-            qtyInput.value = qtyInput.getAttribute('data-original') || 1;
+            // Revert quantity to original value
+            qtyInput.value = originalQuantity;
             itemElement.style.opacity = '1';
             itemElement.style.pointerEvents = 'auto';
-            showNotification(data.message, 'error');
+            showNotification(data.message || 'Error updating quantity', 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
+        // Revert quantity to original value on error
+        qtyInput.value = originalQuantity;
         itemElement.style.opacity = '1';
         itemElement.style.pointerEvents = 'auto';
         showNotification('Error updating quantity', 'error');
     });
 }
 
-// Update cart summary display
-function updateCartSummary(cartTotal) {
+// Update cart summary display with all calculations
+function updateCartSummary(cartData) {
+    // Handle both string and object formats
+    let cartTotal = cartData;
+    if (typeof cartData === 'object') {
+        cartTotal = cartData.cart_total || cartData.grand_total || 0;
+    }
+    
+    const subtotal = parseFloat(cartTotal);
+    const shipping = subtotal > 0 ? 10.00 : 0.00;
+    const tax = (subtotal * 0.1).toFixed(2);
+    const grandTotal = (subtotal + shipping + parseFloat(tax)).toFixed(2);
+    
+    // Update subtotal
+    const subtotalElement = document.querySelector('.subtotal');
+    if (subtotalElement) {
+        subtotalElement.textContent = '$' + subtotal.toFixed(2);
+    }
+    
+    // Update shipping
+    const shippingElement = document.querySelector('.shipping');
+    if (shippingElement) {
+        shippingElement.textContent = '$' + shipping.toFixed(2);
+    }
+    
+    // Update tax
+    const taxElement = document.querySelector('.tax');
+    if (taxElement) {
+        taxElement.textContent = '$' + tax;
+    }
+    
+    // Update grand total
     const grandTotalElement = document.querySelector('.grand-total');
     if (grandTotalElement) {
-        grandTotalElement.textContent = '$' + parseFloat(cartTotal).toFixed(2);
+        grandTotalElement.textContent = '$' + grandTotal;
         grandTotalElement.style.animation = 'pulse 0.4s ease';
+        setTimeout(() => {
+            grandTotalElement.style.animation = 'none';
+        }, 400);
     }
 }
 
@@ -278,14 +335,27 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle quantity input changes
     const qtyInputs = document.querySelectorAll('.qty-input');
     qtyInputs.forEach(input => {
-        input.addEventListener('change', function() {
+        // Store original value
+        input.setAttribute('data-original', input.value);
+        
+        input.addEventListener('change', function(e) {
+            e.preventDefault();
             const itemId = this.closest('.cart-item').getAttribute('data-item-id');
             updateQuantity(itemId, this.value);
         });
         
-        // Prevent non-numeric input
-        input.addEventListener('input', function() {
+        // Prevent non-numeric input and handle in real-time
+        input.addEventListener('input', function(e) {
             this.value = this.value.replace(/[^0-9]/g, '');
+        });
+        
+        // Prevent form submission on Enter key
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const itemId = this.closest('.cart-item').getAttribute('data-item-id');
+                updateQuantity(itemId, this.value);
+            }
         });
     });
     

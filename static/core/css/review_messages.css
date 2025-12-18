@@ -1,3 +1,8 @@
+/* Hidden Class */
+.hidden {
+    display: none !important;
+}
+
 /* Review Message Styles */
 
 .review-message {

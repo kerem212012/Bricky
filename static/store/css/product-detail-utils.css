@@ -1,0 +1,134 @@
+/* Product Detail Utilities CSS */
+
+/* Star Inactive - Faded stars */
+.star-inactive {
+    opacity: 0.3;
+}
+
+/* Stock Icon Colors */
+.icon-in-stock {
+    color: #4caf50;
+}
+
+.icon-out-stock {
+    color: #ff4444;
+}
+
+/* Stock Text Colors */
+.text-in-stock {
+    color: #4caf50;
+    font-weight: 600;
+}
+
+.text-out-stock {
+    color: #ff4444;
+    font-weight: 600;
+}
+
+/* Review Message Hidden */
+.review-message-hidden {
+    display: none !important;
+    margin-top: 10px;
+}
+
+/* Related Products Link */
+.related-products-link {
+    text-align: center;
+    grid-column: 1 / -1;
+    color: var(--text-light);
+    margin: 20px 0;
+}
+
+.related-products-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.related-products-link a:hover {
+    text-decoration: underline;
+    color: var(--primary-hover);
+}
+
+/* Newsletter Gradient Section */
+.newsletter-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin-top: 60px;
+}
+
+/* Newsletter White Content */
+.newsletter-white-content {
+    color: white;
+}
+
+/* Newsletter White Title */
+.newsletter-white-title {
+    color: white;
+}
+
+/* Newsletter Subtitle */
+.newsletter-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Newsletter Form Container */
+.newsletter-form-container {
+    max-width: 400px;
+    margin: 20px auto;
+}
+
+/* Newsletter Input */
+.newsletter-input {
+    border: none;
+    padding: 12px 15px;
+    width: 100%;
+}
+
+.newsletter-input:focus {
+    outline: 2px solid #667eea;
+}
+
+/* Newsletter Button White */
+.newsletter-button-white {
+    background: white;
+    color: #667eea;
+    font-weight: 600;
+}
+
+.newsletter-button-white:hover {
+    background: #f5f5f5;
+}
+
+/* Newsletter Message White */
+.newsletter-white-message {
+    margin-top: 15px;
+    text-align: center;
+    color: white;
+    font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .newsletter-form-container {
+        max-width: 100%;
+    }
+
+    .newsletter-input {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .related-products-link {
+        font-size: 14px;
+    }
+
+    .newsletter-white-title {
+        font-size: 22px;
+    }
+
+    .newsletter-subtitle {
+        font-size: 14px;
+    }
+}

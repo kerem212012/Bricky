@@ -5,6 +5,7 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'store/css/product-detail.css' %}">
+    <link rel="stylesheet" href="{% static 'store/css/product-detail-utils.css' %}">
     <link rel="stylesheet" href="{% static 'core/css/review_messages.css' %}">
 {% endblock %}
 
@@ -60,12 +61,12 @@
                                     {% if i|add:"0" <= average_rating|add:"0.5" %}
                                         <i class="fas fa-star"></i>
                                     {% else %}
-                                        <i class="fas fa-star" style="opacity: 0.3;"></i>
+                                        <i class="fas fa-star star-inactive"></i>
                                     {% endif %}
                                 {% endfor %}
                             {% else %}
                                 {% for i in "12345" %}
-                                    <i class="fas fa-star" style="opacity: 0.3;"></i>
+                                    <i class="fas fa-star star-inactive"></i>
                                 {% endfor %}
                             {% endif %}
                         </div>
@@ -79,10 +80,10 @@
                     <span class="current-price">${{ product.price }}</span>
                     <span class="stock-info">
                         {% if product.stock > 0 %}
-                            <i class="fas fa-check-circle" style="color: #4caf50;"></i>
+                            <i class="fas fa-check-circle icon-in-stock"></i>
                             {{ product.stock }} in stock
                         {% else %}
-                            <i class="fas fa-times-circle" style="color: #ff4444;"></i>
+                            <i class="fas fa-times-circle icon-out-stock"></i>
                             Out of stock
                         {% endif %}
                     </span>
@@ -106,9 +107,9 @@
                             <span class="spec-label">Availability</span>
                             <span class="spec-value">
                                 {% if product.stock > 0 %}
-                                    <span style="color: #4caf50;">In Stock</span>
+                                    <span class="text-in-stock">In Stock</span>
                                 {% else %}
-                                    <span style="color: #ff4444;">Out of Stock</span>
+                                    <span class="text-out-stock">Out of Stock</span>
                                 {% endif %}
                             </span>
                         </div>
@@ -214,7 +215,7 @@
                                             {% if i|add:"0" <= review.rating %}
                                                 <i class="fas fa-star"></i>
                                             {% else %}
-                                                <i class="fas fa-star" style="opacity: 0.3;"></i>
+                                                <i class="fas fa-star star-inactive"></i>
                                             {% endif %}
                                         {% endfor %}
                                     </div>
@@ -273,7 +274,7 @@
                                 </div>
                                 
                                 <button type="submit" class="btn-primary">Submit Review</button>
-                                <div id="review-message" class="review-message" style="display:none; margin-top: 10px;"></div>
+                                <div id="review-message" class="review-message review-message-hidden"></div>
                             </form>
                         </div>
                     {% else %}
@@ -315,7 +316,7 @@
             <h2>You May Also Like</h2>
             <div class="products-grid">
                 <!-- Related products would be loaded here -->
-                <p style="text-align: center; grid-column: 1/-1; color: var(--text-light);">
+                <p class="related-products-link">
                     <a href="{% url 'core:category' product.category.slug %}">View more {{ product.category.title }} products →</a>
                 </p>
             </div>
@@ -323,17 +324,17 @@
     </section>
 
     <!-- Newsletter CTA Section -->
-    <section class="newsletter-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-top: 60px;">
+    <section class="newsletter-section newsletter-gradient">
         <div class="container">
-            <div class="newsletter-content" style="color: white;">
-                <h2 style="color: white;">Don't Miss Out!</h2>
-                <p style="color: rgba(255,255,255,0.9);">Get exclusive discounts on new LEGO sets and building tips delivered to your inbox</p>
-                <form class="newsletter-form" id="newsletter-form-product" action="{% url 'core:newsletter_subscribe_ajax' %}" style="max-width: 400px; margin: 20px auto;">
+            <div class="newsletter-content newsletter-white-content">
+                <h2 class="newsletter-white-title">Don't Miss Out!</h2>
+                <p class="newsletter-subtitle">Get exclusive discounts on new LEGO sets and building tips delivered to your inbox</p>
+                <form class="newsletter-form newsletter-form-container" id="newsletter-form-product" action="{% url 'core:newsletter_subscribe_ajax' %}">
                     {% csrf_token %}
-                    <input type="email" name="email" placeholder="Enter your email" required style="border: none; padding: 12px 15px;">
-                    <button type="submit" class="btn-primary" style="background: white; color: #667eea; font-weight: 600;">Subscribe Now</button>
+                    <input type="email" name="email" placeholder="Enter your email" required class="newsletter-input">
+                    <button type="submit" class="btn-primary newsletter-button-white">Subscribe Now</button>
                 </form>
-                <div id="newsletter-message-product" style="margin-top: 15px; text-align: center; color: white; font-size: 14px;"></div>
+                <div id="newsletter-message-product" class="newsletter-message newsletter-white-message"></div>
             </div>
         </div>
     </section>

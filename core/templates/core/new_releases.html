@@ -52,7 +52,7 @@
                         </div>
                         <div class="release-image">
                             {% if product.picture and product.picture.name != 'products/default.png' %}
-                                <img src="{{ product.picture.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                <img src="{{ product.picture.url }}" alt="{{ product.name }}" class="release-image-img">
                             {% else %}
                                 <div class="image-placeholder">
                                     <i class="fas fa-cube"></i>
@@ -66,16 +66,16 @@
                             <p class="release-description">{{ product.description|truncatewords:15 }}</p>
                             <div class="release-price">${{ product.price }}</div>
                             {% if product.status == 'C' %}
-                                <button class="btn-secondary" style="width: 100%;">Coming Soon</button>
+                                <button class="btn-secondary btn-full-width">Coming Soon</button>
                             {% else %}
-                                <a href="{{ product.get_absolute_url }}" class="btn-primary" style="width: 100%; display: block; text-align: center; text-decoration: none;">View Details</a>
+                                <a href="{{ product.get_absolute_url }}" class="btn-primary btn-card-link">View Details</a>
                             {% endif %}
                         </div>
                     </div>
                 {% endfor %}
             {% else %}
-                <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                    <p style="font-size: 18px; color: var(--text-light);">No products found in this category.</p>
+                <div class="no-products-container">
+                    <p class="no-products-text">No products found in this category.</p>
                 </div>
             {% endif %}
         </div>

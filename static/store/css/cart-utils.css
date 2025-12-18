@@ -1,0 +1,46 @@
+/* Cart Utilities & Info Banner Styles */
+
+/* Info Banner */
+.cart-info-banner {
+    padding: 12px 16px;
+    background: #e3f2fd;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    border-left: 4px solid #2196f3;
+}
+
+.cart-info-banner i {
+    margin-right: 6px;
+    color: #2196f3;
+}
+
+.cart-info-banner strong {
+    font-weight: 600;
+    color: #1976d2;
+}
+
+/* Newsletter Message Container */
+.newsletter-message-container {
+    margin-top: 15px;
+    text-align: center;
+}
+
+/* Browse Products Text */
+.browse-products-text {
+    text-align: center;
+    color: var(--text-light);
+    grid-column: 1 / -1;
+}
+
+.browse-products-text a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.browse-products-text a:hover {
+    text-decoration: underline;
+    color: var(--primary-hover);
+}
