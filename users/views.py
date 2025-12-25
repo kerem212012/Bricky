@@ -24,7 +24,7 @@ class LoginView(TemplateView):
     POST: process login form
     GET: display login form
     """
-    template_name = 'users/login.html'
+    template_name = 'users/auth/login.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -52,7 +52,7 @@ class RegisterView(TemplateView):
     POST: process registration form
     GET: display registration form
     """
-    template_name = 'users/register.html'
+    template_name = 'users/auth/register.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -88,7 +88,7 @@ class ProfileView(LoginRequiredMixin, TemplateView):
     View for user profile
     GET: display user profile information
     """
-    template_name = 'users/profile.html'
+    template_name = 'users/profile/dashboard.html'
     login_url = 'users:login'
 
     def get_context_data(self, **kwargs):
@@ -104,7 +104,7 @@ class ProfileEditView(LoginRequiredMixin, UpdateView):
     POST: process edit profile form
     """
     model = CustomUser
-    template_name = 'users/profile_edit.html'
+    template_name = 'users/profile/edit.html'
     fields = ['username', 'email', 'first_name', 'last_name', 'phone', 'picture']
     success_url = reverse_lazy('users:profile')
     login_url = 'users:login'
@@ -119,7 +119,7 @@ def user_logout(request) -> Any:
     GET: log out the user and redirect to homepage
     """
     logout(request)
-    return redirect('core:index')
+    return redirect('store:index')
 
 
 def send_verification(request, user) -> Any:
@@ -152,7 +152,7 @@ def send_verification(request, user) -> Any:
         
         # Prepare email
         subject = "Email confirmation - Bricky"
-        message = render_to_string("users/email_verify.html", {
+        message = render_to_string("users/email/verify.html", {
             "user": user,
             "verify_url": verify_url,
             "domain": domain,
@@ -180,7 +180,7 @@ class EmailVerifyView(TemplateView):
     View to verify user's email address
     Simple and reliable token validation
     """
-    template_name = 'users/email_verified_success.html'
+    template_name = 'users/email/verified_success.html'
 
     def get(self, request, uidb64, token, *args, **kwargs):
         User = get_user_model()
@@ -190,7 +190,7 @@ class EmailVerifyView(TemplateView):
             uid = urlsafe_base64_decode(uidb64).decode()
             user = User.objects.get(pk=uid)
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            return render(request, 'users/email_verified_failed.html', {
+            return render(request, 'users/email/verified_failed.html', {
                 'error': 'Invalid verification link.',
                 'show_resend': True
             })
@@ -200,13 +200,13 @@ class EmailVerifyView(TemplateView):
             # Mark email as verified
             user.email_is_verified = True
             user.save(update_fields=['email_is_verified'])
-            return render(request, 'users/email_verified_success.html', {
+            return render(request, 'users/email/verified_success.html', {
                 'user': user,
                 'message': 'Your email has been successfully verified!'
             })
         
         # Token is invalid or expired
-        return render(request, 'users/email_verified_failed.html', {
+        return render(request, 'users/email/verified_failed.html', {
             'error': 'The verification link is invalid or has expired.',
             'show_resend': True
         })
@@ -216,7 +216,7 @@ class ResendVerificationEmailView(LoginRequiredMixin, TemplateView):
     """
     View to resend email verification link
     """
-    template_name = 'users/email_resend.html'
+    template_name = 'users/email/resend.html'
     login_url = 'users:login'
 
     def get(self, request, *args, **kwargs):

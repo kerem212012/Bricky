@@ -1,0 +1,252 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}About Bricky | LEGO Store - Build Your World{% endblock %}
+
+{% block content %}
+<div class="about-page-container">
+    <!-- About Hero -->
+    <section class="about-hero">
+        <div class="container">
+            <h1>About Bricky</h1>
+            <p>Your Premier LEGO Destination Since 2020</p>
+        </div>
+    </section>
+
+    <!-- Our Story -->
+    <section class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>Our Story</h2>
+                    <p>
+                        Bricky was founded with a simple mission: to bring the joy of building to enthusiasts of all ages. 
+                        What started as a small passion project has grown into one of Turkey's leading LEGO retailers.
+                    </p>
+                    <p>
+                        We believe that LEGO is more than just toys—it's a way to express creativity, build confidence, 
+                        and create lasting memories with family and friends. Every set we curate is chosen with care to 
+                        ensure quality, authenticity, and value.
+                    </p>
+                </div>
+                <div class="about-image">
+                    <div class="image-placeholder">
+                        <i class="fas fa-cube"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Values -->
+    <section class="values-section">
+        <div class="container">
+            <h2>Our Values</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <h3>Authenticity</h3>
+                    <p>Every product in our store is 100% authentic and official LEGO merchandise. We guarantee quality and reliability.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Customer First</h3>
+                    <p>Your satisfaction is our priority. We offer hassle-free returns, expert customer service, and competitive pricing.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3>Innovation</h3>
+                    <p>We continuously improve our service, curate the latest collections, and bring new experiences to our customers.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>Community</h3>
+                    <p>We believe in building a community of builders. Share your creations, join events, and connect with fellow enthusiasts.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team-section">
+        <div class="container">
+            <h2>Our Team</h2>
+            <p class="section-subtitle">Passionate builders dedicated to your brick collection</p>
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="member-image">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <h4>Team Member</h4>
+                    <p>Customer Service</p>
+                </div>
+                <div class="team-member">
+                    <div class="member-image">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <h4>Team Member</h4>
+                    <p>Product Specialist</p>
+                </div>
+                <div class="team-member">
+                    <div class="member-image">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <h4>Team Member</h4>
+                    <p>Community Manager</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="about-cta">
+        <div class="container">
+            <h2>Ready to Start Building?</h2>
+            <p>Explore our collection and find your next favorite set</p>
+            <a href="{% url 'store:shop' %}" class="btn btn-primary">Shop Now</a>
+        </div>
+    </section>
+</div>
+
+<style>
+    .about-page-container {
+        background: white;
+    }
+
+    .about-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 80px 0;
+        text-align: center;
+    }
+
+    .about-hero h1 {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+
+    .about-section, .values-section, .team-section, .about-cta {
+        padding: 80px 0;
+    }
+
+    .about-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 50px;
+        align-items: center;
+    }
+
+    .about-text h2, .values-section h2, .team-section h2, .about-cta h2 {
+        font-size: 32px;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .about-text p {
+        color: #666;
+        line-height: 1.8;
+        margin-bottom: 15px;
+        font-size: 16px;
+    }
+
+    .image-placeholder {
+        background: #f0f0f0;
+        border-radius: 12px;
+        height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .image-placeholder i {
+        font-size: 100px;
+        color: #ddd;
+    }
+
+    .values-grid, .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+    }
+
+    .value-card, .team-member {
+        background: #f8f9fa;
+        padding: 30px;
+        border-radius: 12px;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .value-card:hover, .team-member:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .value-icon, .member-image {
+        font-size: 48px;
+        color: #667eea;
+        margin-bottom: 15px;
+    }
+
+    .value-card h3, .team-member h4 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .value-card p, .team-member p {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .section-subtitle {
+        color: #666;
+        font-size: 18px;
+        margin-bottom: 30px;
+    }
+
+    .about-cta {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-align: center;
+    }
+
+    .about-cta h2, .about-cta p {
+        color: white;
+    }
+
+    .about-cta .btn {
+        margin-top: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .about-hero h1 {
+            font-size: 32px;
+        }
+
+        .about-content {
+            grid-template-columns: 1fr;
+        }
+
+        .image-placeholder {
+            height: 300px;
+        }
+
+        .about-text h2, .values-section h2, .team-section h2, .about-cta h2 {
+            font-size: 24px;
+        }
+
+        .values-grid, .team-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

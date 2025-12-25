@@ -1,0 +1,98 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Privacy Policy | Bricky LEGO Store{% endblock %}
+
+{% block content %}
+<div class="legal-page">
+    <!-- Page Header -->
+    <section class="page-header legal-header">
+        <div class="container">
+            <h1><i class="fas fa-shield-alt"></i> Privacy Policy</h1>
+            <p class="subtitle">Last Updated: December 2024</p>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <div class="container legal-content">
+        <div class="legal-wrapper">
+            <!-- Sidebar TOC -->
+            <aside class="legal-sidebar">
+                <nav class="toc-nav">
+                    <h3><i class="fas fa-list"></i> Table of Contents</h3>
+                    <a href="#information">Information Collection</a>
+                    <a href="#use">Use of Information</a>
+                    <a href="#protection">Data Protection</a>
+                    <a href="#cookies">Cookies</a>
+                    <a href="#sharing">Third Party Sharing</a>
+                    <a href="#rights">Your Rights</a>
+                    <a href="#contact">Contact</a>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="legal-main">
+                <section id="information" class="legal-section">
+                    <h2><i class="fas fa-database"></i> Information We Collect</h2>
+                    <p>We collect various types of information to provide and improve our services:</p>
+                    <ul>
+                        <li>Personal data (name, email, phone, address)</li>
+                        <li>Payment information</li>
+                        <li>Account credentials and profile data</li>
+                        <li>Order history and preferences</li>
+                        <li>Device and usage information</li>
+                    </ul>
+                </section>
+
+                <section id="use" class="legal-section">
+                    <h2><i class="fas fa-cog"></i> How We Use Your Information</h2>
+                    <p>Your information is used for:</p>
+                    <ul>
+                        <li>Processing orders and delivering products</li>
+                        <li>Communicating about orders and promotions</li>
+                        <li>Preventing fraud and securing accounts</li>
+                        <li>Improving our services through analytics</li>
+                        <li>Complying with legal requirements</li>
+                    </ul>
+                </section>
+
+                <section id="protection" class="legal-section">
+                    <h2><i class="fas fa-lock"></i> Data Protection</h2>
+                    <p>We implement industry-standard security measures including SSL/TLS encryption, access controls, and regular security audits to protect your information.</p>
+                </section>
+
+                <section id="cookies" class="legal-section">
+                    <h2><i class="fas fa-cookie"></i> Cookies & Tracking</h2>
+                    <p>We use cookies for site functionality, analytics, and personalization. You can manage cookie preferences in your browser settings.</p>
+                </section>
+
+                <section id="sharing" class="legal-section">
+                    <h2><i class="fas fa-share-alt"></i> Third Party Sharing</h2>
+                    <p>We may share information with trusted partners such as payment processors, shipping companies, and service providers as necessary to operate our business.</p>
+                </section>
+
+                <section id="rights" class="legal-section">
+                    <h2><i class="fas fa-user-check"></i> Your Privacy Rights</h2>
+                    <p>You have the right to access, update, delete, and opt-out of marketing communications regarding your personal information.</p>
+                </section>
+
+                <section id="contact" class="legal-section">
+                    <h2><i class="fas fa-envelope"></i> Contact Us</h2>
+                    <p>For privacy inquiries, contact:</p>
+                    <ul>
+                        <li><strong>Email:</strong> <a href="mailto:privacy@bricky.com">privacy@bricky.com</a></li>
+                        <li><strong>Phone:</strong> <a href="tel:+1234567890">+1 (234) 567-890</a></li>
+                    </ul>
+                </section>
+
+                <div class="legal-notice">
+                    <i class="fas fa-info-circle"></i>
+                    <p>This privacy policy may be updated without notice. We encourage you to review it regularly for changes.</p>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="{% static 'core/css/legal.css' %}">
+{% endblock %}

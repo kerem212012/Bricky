@@ -17,7 +17,7 @@
             <aside class="shop-sidebar">
                 <div class="sidebar-header">
                     <h3>Filters</h3>
-                    <a href="{% url 'core:shop' %}" class="clear-filters">Clear All</a>
+                    <a href="{% url 'store:shop' %}" class="clear-filters">Clear All</a>
                 </div>
 
                 <form method="get" class="filters-form" id="filters-form">
@@ -148,7 +148,7 @@
                     <div class="no-products">
                         <i class="fas fa-box"></i>
                         <p>No products found matching your filters</p>
-                        <a href="{% url 'core:shop' %}" class="btn-primary">View All Products</a>
+                        <a href="{% url 'store:shop' %}" class="btn-primary">View All Products</a>
                     </div>
                     {% endfor %}
                 </div>
@@ -181,4 +181,3 @@
 <link rel="stylesheet" href="{% static 'store/css/shop.css' %}">
 <script src="{% static 'store/js/shop.js' %}"></script>
 {% endblock %}
-

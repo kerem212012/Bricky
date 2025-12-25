@@ -36,12 +36,11 @@ class Order(models.Model):
     """
     class StatusChoice(models.TextChoices):
         NEW = "N", "New order"
-        BILLED = "B", "Billed order"
         PROCESSED = "P", "Processed"
         SHIPPED = "S", "Shipped order"
         COMPLETED = "C", "Completed order"
-        DROPPED = "D", "Dropped order"
 
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True, unique=True)
     status = models.CharField(max_length=1, choices=StatusChoice.choices, db_index=True,
                               default=StatusChoice.NEW)
     customer = models.ForeignKey(

@@ -15,7 +15,7 @@
         <div class="container">
             <h1><i class="fas fa-shopping-cart"></i> Shopping Cart</h1>
             <p class="breadcrumb">
-                <a href="{% url 'core:index' %}">Home</a> / 
+                <a href="{% url 'store:index' %}">Home</a> / 
                 <span>Shopping Cart</span>
             </p>
         </div>
@@ -96,7 +96,7 @@
                     <i class="fas fa-shopping-cart"></i>
                     <h2>Your Cart is Empty</h2>
                     <p>Browse our collection and add some amazing LEGO sets to your cart!</p>
-                    <a href="{% url 'core:shop' %}" class="btn-primary"> Continue Shopping</a>
+                    <a href="{% url 'store:shop' %}" class="btn-primary"> Continue Shopping</a>
                 </div>
                 {% endif %}
             </div>
@@ -129,8 +129,8 @@
                 </div>
 
                 <div class="checkout-buttons">
-                    <a href="{% url 'core:checkout' %}" class="btn-primary btn-checkout"><i class="fas fa-credit-card"></i> Proceed to Checkout</a>
-                    <a href="{% url 'core:shop' %}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Continue Shopping</a>
+                    <a href="{% url 'orders:checkout' %}" class="btn-primary btn-checkout"><i class="fas fa-credit-card"></i> Proceed to Checkout</a>
+                    <a href="{% url 'store:shop' %}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Continue Shopping</a>
                 </div>
 
                 <!-- Promo Code -->
@@ -169,9 +169,9 @@
 <script>
     // Override defaults with Django URLs
     window.CART_URLS = {
-        'remove_from_cart': '{% url "core:remove_from_cart" %}',
-        'update_cart': '{% url "core:update_cart" %}',
-        'clear_cart': '{% url "core:clear_cart" %}'
+        'remove_from_cart': '{% url "orders:remove_from_cart" %}',
+        'update_cart': '{% url "orders:update_cart" %}',
+        'clear_cart': '{% url "orders:clear_cart" %}'
     };
 </script>
 {% endblock %}

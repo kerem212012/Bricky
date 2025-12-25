@@ -12,13 +12,13 @@
 {% block content %}
 <div class="product-detail-container">
     <!-- Review Messages -->
-    {% include 'core/review_messages.html' %}
+    {% include 'store/product/review_messages.html' %}
 
     <!-- Breadcrumb -->
     <div class="container">
         <p class="breadcrumb">
-            <a href="{% url 'core:index' %}">Home</a> / 
-            <a href="{% url 'core:category' product.category.slug %}">{{ product.category.title }}</a> / 
+            <a href="{% url 'store:index' %}">Home</a> / 
+            <a href="{% url 'store:category' product.category.slug %}">{{ product.category.title }}</a> / 
             <span>{{ product.name }}</span>
         </p>
     </div>
@@ -243,7 +243,7 @@
                     {% if not user_has_reviewed %}
                         <div class="review-form">
                             <h4>Leave a Review</h4>
-                            <form id="review-form-{{ product.id }}" method="post" action="{% url 'core:create_review' %}">
+                            <form id="review-form-{{ product.id }}" method="post" action="{% url 'store:create_review' %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="product_id" value="{{ product.id }}">
                                 
@@ -317,7 +317,7 @@
             <div class="products-grid">
                 <!-- Related products would be loaded here -->
                 <p class="related-products-link">
-                    <a href="{% url 'core:category' product.category.slug %}">View more {{ product.category.title }} products →</a>
+                    <a href="{% url 'store:category' product.category.slug %}">View more {{ product.category.title }} products →</a>
                 </p>
             </div>
         </div>
@@ -340,13 +340,10 @@
     </section>
 </div>
 
-    </section>
-
-
 <script src="{% static 'store/js/product-detail-config.js' %}"></script>
 <script>
     // Override the default URL with the Django URL
-    const addToCartUrl = "{% url 'core:add_to_cart' %}";
+    const addToCartUrl = "{% url 'orders:add_to_cart' %}";
 </script>
 <script src="{% static 'store/js/product-detail.js' %}"></script>
 <script src="{% static 'store/js/review-system.js' %}"></script>

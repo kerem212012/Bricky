@@ -24,7 +24,7 @@ function addToCart(productId, productName) {
     form.append('product_id', productId);
     form.append('quantity', 1);
 
-    fetch("/cart/add/", {
+    fetch("/orders/cart/add/", {
         method: 'POST',
         body: form,
         headers: {

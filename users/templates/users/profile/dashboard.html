@@ -1,0 +1,114 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}My Profile - Bricky LEGO Store{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="container">
+        <!-- Profile Header -->
+        <section class="profile-header">
+            <h1><i class="fas fa-user-circle"></i> My Profile</h1>
+            <p>Manage your account and preferences</p>
+        </section>
+
+        <div class="profile-wrapper">
+            <!-- Profile Sidebar -->
+            <aside class="profile-sidebar">
+                <nav class="profile-nav">
+                    <a href="{% url 'users:profile' %}" class="profile-link active">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <a href="{% url 'users:profile_edit' %}" class="profile-link">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                    <a href="{% url 'users:logout' %}" class="profile-link logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Profile Main Content -->
+            <main class="profile-main">
+                <!-- User Info -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <h2>Account Information</h2>
+                        <a href="{% url 'users:profile_edit' %}" class="btn-secondary">Edit</a>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Full Name</span>
+                            <span class="value">{{ user.get_full_name|default:"Not set" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Email</span>
+                            <span class="value">{{ user.email }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Username</span>
+                            <span class="value">{{ user.username }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Member Since</span>
+                            <span class="value">{{ user.date_joined|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Recent Orders -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <h2>Recent Orders</h2>
+                        <a href="#" class="btn-secondary">View All</a>
+                    </div>
+
+                    {% if orders %}
+                        <div class="orders-list">
+                            {% for order in orders|slice:":5" %}
+                                <div class="order-card">
+                                    <div class="order-header">
+                                        <span class="order-id">Order #{{ order.id|truncatechars:8 }}</span>
+                                        <span class="order-date">{{ order.registered_at|date:"M d, Y" }}</span>
+                                    </div>
+                                    <div class="order-footer">
+                                        <span class="order-total">${{ order.total_price }}</span>
+                                        <span class="order-status badge-{{ order.status }}">{{ order.get_status_display }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-shopping-bag"></i>
+                            <p>No orders yet. <a href="{% url 'store:shop' %}">Start shopping</a></p>
+                        </div>
+                    {% endif %}
+                </section>
+
+                <!-- Preferences -->
+                <section class="profile-section">
+                    <h2>Preferences</h2>
+                    
+                    <div class="preference-item">
+                        <div class="preference-text">
+                            <h4>Newsletter</h4>
+                            <p>Receive updates about new products and special offers</p>
+                        </div>
+                        <div class="preference-toggle">
+                            {% if is_newsletter_subscriber %}
+                                <span class="badge-success">Subscribed</span>
+                            {% else %}
+                                <span class="badge-secondary">Not Subscribed</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="{% static 'users/css/profile.css' %}">
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Terms of Service | Bricky LEGO Store{% endblock %}
+
+{% block content %}
+<div class="legal-page">
+    <!-- Page Header -->
+    <section class="page-header legal-header">
+        <div class="container">
+            <h1><i class="fas fa-file-contract"></i> Terms of Service</h1>
+            <p class="subtitle">Last Updated: December 2024</p>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <div class="container legal-content">
+        <div class="legal-wrapper">
+            <!-- Sidebar TOC -->
+            <aside class="legal-sidebar">
+                <nav class="toc-nav">
+                    <h3><i class="fas fa-list"></i> Table of Contents</h3>
+                    <a href="#agreement">Agreement Terms</a>
+                    <a href="#license">Use License</a>
+                    <a href="#responsibilities">User Responsibilities</a>
+                    <a href="#products">Products & Services</a>
+                    <a href="#pricing">Pricing & Payment</a>
+                    <a href="#returns">Returns & Refunds</a>
+                    <a href="#liability">Limitation of Liability</a>
+                    <a href="#disputes">Dispute Resolution</a>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="legal-main">
+                <section id="agreement" class="legal-section">
+                    <h2><i class="fas fa-handshake"></i> Agreement to Terms</h2>
+                    <p>By using Bricky LEGO Store, you agree to these terms and conditions. If you disagree, please do not use our services.</p>
+                    <p><strong>Eligibility:</strong> You must be at least 13 years old to use our services. Users under 18 need parental consent.</p>
+                </section>
+
+                <section id="license" class="legal-section">
+                    <h2><i class="fas fa-certificate"></i> Use License</h2>
+                    <p>Permission is granted to temporarily download materials for personal, non-commercial viewing. You may NOT:</p>
+                    <ul>
+                        <li>Modify or copy materials</li>
+                        <li>Use for commercial purposes</li>
+                        <li>Reverse engineer any software</li>
+                        <li>Remove copyright notices</li>
+                        <li>Transfer materials to others</li>
+                        <li>Violate applicable laws</li>
+                    </ul>
+                </section>
+
+                <section id="responsibilities" class="legal-section">
+                    <h2><i class="fas fa-user-shield"></i> User Responsibilities</h2>
+                    <p>You are responsible for:</p>
+                    <ul>
+                        <li>Maintaining account security and confidentiality</li>
+                        <li>Providing accurate information</li>
+                        <li>Complying with all applicable laws</li>
+                        <li>Not engaging in prohibited conduct</li>
+                    </ul>
+                </section>
+
+                <section id="products" class="legal-section">
+                    <h2><i class="fas fa-cube"></i> Products & Services</h2>
+                    <p>All products are offered on an "as-available" basis and subject to availability. We reserve the right to limit quantities and refuse orders. Product descriptions are provided in good faith but not guaranteed to be error-free.</p>
+                </section>
+
+                <section id="pricing" class="legal-section">
+                    <h2><i class="fas fa-credit-card"></i> Pricing & Payment</h2>
+                    <p>All prices are subject to change without notice. Charges include product cost, shipping (free over $50), and applicable tax (10%). We accept major credit cards with secure encryption.</p>
+                </section>
+
+                <section id="returns" class="legal-section">
+                    <h2><i class="fas fa-undo"></i> Returns & Refunds</h2>
+                    <p>We offer a 30-day money-back guarantee. Items must be in original, unused condition with all packaging. Return shipping may apply. Refunds exclude original shipping costs and are processed within 7 business days.</p>
+                </section>
+
+                <section id="liability" class="legal-section">
+                    <h2><i class="fas fa-gavel"></i> Limitation of Liability</h2>
+                    <p>Materials on our website are provided "as-is". We make no warranties and disclaim all implied warranties including merchantability and fitness for a particular purpose.</p>
+                </section>
+
+                <section id="disputes" class="legal-section">
+                    <h2><i class="fas fa-handshake"></i> Dispute Resolution</h2>
+                    <p>For disputes, contact our support team:</p>
+                    <ul>
+                        <li><strong>Email:</strong> <a href="mailto:support@bricky.com">support@bricky.com</a></li>
+                        <li><strong>Phone:</strong> <a href="tel:+1234567890">+1 (234) 567-890</a></li>
+                    </ul>
+                </section>
+
+                <div class="legal-notice">
+                    <i class="fas fa-info-circle"></i>
+                    <p>These terms constitute the entire agreement and supersede all prior communications regarding your use of our website.</p>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="{% static 'core/css/legal.css' %}">
+{% endblock %}

@@ -6,12 +6,17 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')),  # Core app now handles all main routes
-    path('notifications/', include('notifications.urls')),
-    path('orders/', include('orders.urls')),
-    path('users/', include('users.urls')),
+    path('', include('core.urls')),  # Core app handles legal/contact/newsletter
+    path('', include('store.urls')),  # Store app handles product browsing
+    path('users/', include('users.urls')),  # Users app handles authentication & profiles
+    path('orders/', include('orders.urls')),  # Orders app handles cart & checkout
+    path('notifications/', include('notifications.urls')),  # Notifications app
 ]
+
+# Debug toolbar URLs
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += debug_toolbar_urls()
+    # Serve media files in development
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Serve static files in development
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

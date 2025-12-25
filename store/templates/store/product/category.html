@@ -23,8 +23,8 @@
                 <div class="category-hero-text">
                     <h1>{{ category.title }}</h1>
                     <p class="category-breadcrumb">
-                        <a href="{% url 'core:index' %}">Home</a> / 
-                        <a href="{% url 'core:shop' %}">Shop</a> / 
+                        <a href="{% url 'store:index' %}">Home</a> / 
+                        <a href="{% url 'store:shop' %}">Shop</a> / 
                         <span>{{ category.title }}</span>
                     </p>
                     <p class="category-description">
@@ -47,7 +47,7 @@
             <aside class="category-sidebar">
                 <div class="sidebar-header">
                     <h3>Filters</h3>
-                    <a href="{% url 'core:category' category.slug %}" class="clear-filters">Clear</a>
+                    <a href="{% url 'store:category' category.slug %}" class="clear-filters">Clear</a>
                 </div>
 
                 <form method="get" class="category-filters">
@@ -147,7 +147,7 @@
                     <div class="no-products-message">
                         <i class="fas fa-box-open"></i>
                         <h3>No products found</h3>
-                        <p>Try adjusting your filters or <a href="{% url 'core:shop' %}">browse all products</a></p>
+                        <p>Try adjusting your filters or <a href="{% url 'store:shop' %}">browse all products</a></p>
                     </div>
                     {% endfor %}
                 </div>
@@ -199,7 +199,7 @@
             <h2>Explore Other Categories</h2>
             <div class="categories-showcase">
                 {% for cat in other_categories %}
-                <a href="{% url 'core:category' cat.slug %}" class="category-link">
+                <a href="{% url 'store:category' cat.slug %}" class="category-link">
                     {% if cat.picture and cat.picture.name %}
                         <img src="{{ cat.picture.url }}" alt="{{ cat.title }}">
                     {% else %}
@@ -217,4 +217,3 @@
 
 <script src="{% static 'store/js/category.js' %}"></script>
 {% endblock %}
-

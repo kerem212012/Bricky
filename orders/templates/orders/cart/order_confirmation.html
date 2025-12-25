@@ -15,7 +15,7 @@
                 <h1>Order Confirmed!</h1>
                 <p>Thank you for your purchase. Your order has been received and is being prepared.</p>
                 <div class="order-number">
-                    Order #<span>{{ order.id }}</span>
+                    Order #<span>{{ order.uuid }}</span>
                 </div>
             </div>
         </div>
@@ -29,20 +29,28 @@
                 <!-- Order Status -->
                 <div class="status-card">
                     <h3>Order Status</h3>
+                    <p class="status-badge" style="margin-bottom: 20px;">
+                        <strong>Current Status:</strong> 
+                        <span style="padding: 5px 10px; background: #2196f3; color: white; border-radius: 4px;">
+                            {{ order.get_status_display }}
+                        </span>
+                    </p>
                     <div class="status-timeline">
-                        <div class="timeline-item completed">
+                        <!-- Order Placed -->
+                        <div class="timeline-item {% if order.status in 'NPSC' %}completed{% endif %}">
                             <div class="timeline-marker">
                                 <i class="fas fa-check"></i>
                             </div>
                             <div class="timeline-content">
                                 <h4>Order Placed</h4>
-                                <p>{{ order.created_at|date:"F j, Y" }}</p>
+                                <p>{{ order.registered_at|date:"F j, Y" }}</p>
                             </div>
                         </div>
 
-                        <div class="timeline-item">
+                        <!-- Processing -->
+                        <div class="timeline-item {% if order.status in 'PSC' %}completed{% endif %}">
                             <div class="timeline-marker">
-                                <i class="fas fa-box"></i>
+                                <i class="fas fa-cog"></i>
                             </div>
                             <div class="timeline-content">
                                 <h4>Processing</h4>
@@ -50,7 +58,8 @@
                             </div>
                         </div>
 
-                        <div class="timeline-item">
+                        <!-- Shipped -->
+                        <div class="timeline-item {% if order.status in 'SC' %}completed{% endif %}">
                             <div class="timeline-marker">
                                 <i class="fas fa-truck"></i>
                             </div>
@@ -60,13 +69,18 @@
                             </div>
                         </div>
 
-                        <div class="timeline-item">
+                        <!-- Delivered -->
+                        <div class="timeline-item {% if order.status == 'C' %}completed{% endif %}">
                             <div class="timeline-marker">
                                 <i class="fas fa-home"></i>
                             </div>
                             <div class="timeline-content">
                                 <h4>Delivered</h4>
-                                <p>Expected by {{ order.created_at|date:"F j, Y" }}</p>
+                                {% if order.delivered_at %}
+                                    <p>Delivered on {{ order.delivered_at|date:"F j, Y" }}</p>
+                                {% else %}
+                                    <p>Expected delivery date coming soon</p>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -146,7 +160,7 @@
                             <i class="fas fa-user-circle"></i>
                             <span>View Account</span>
                         </a>
-                        <a href="{% url 'core:shop' %}" class="action-item">
+                        <a href="{% url 'store:shop' %}" class="action-item">
                             <i class="fas fa-shopping-bag"></i>
                             <span>Continue Shopping</span>
                         </a>
@@ -205,7 +219,7 @@
             <div class="products-grid">
                 <!-- Products would be dynamically loaded here -->
                 <p class="browse-products-text">
-                    <a href="{% url 'core:shop' %}">Browse More Products →</a>
+                    <a href="{% url 'store:shop' %}">Browse More Products →</a>
                 </p>
             </div>
         </div>

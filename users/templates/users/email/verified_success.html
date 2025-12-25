@@ -1,0 +1,25 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Email Verified - Bricky LEGO Store{% endblock %}
+
+{% block content %}
+<div class="email-status-container">
+    <div class="container">
+        <div class="status-card success">
+            <div class="status-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1>Email Verified Successfully!</h1>
+            <p>Your email address has been verified. Your account is now fully activated.</p>
+            
+            <div class="action-buttons">
+                <a href="{% url 'store:index' %}" class="btn-primary">Go to Home</a>
+                <a href="{% url 'store:shop' %}" class="btn-secondary">Start Shopping</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="{% static 'users/css/email.css' %}">
+{% endblock %}
