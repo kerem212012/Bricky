@@ -207,8 +207,7 @@ function updateCartSummary(cartData) {
     
     const subtotal = parseFloat(cartTotal);
     const shipping = subtotal > 0 ? 10.00 : 0.00;
-    const tax = (subtotal * 0.1).toFixed(2);
-    const grandTotal = (subtotal + shipping + parseFloat(tax)).toFixed(2);
+    const grandTotal = (subtotal + shipping).toFixed(2);
     
     // Update subtotal
     const subtotalElement = document.querySelector('.subtotal');
@@ -220,12 +219,6 @@ function updateCartSummary(cartData) {
     const shippingElement = document.querySelector('.shipping');
     if (shippingElement) {
         shippingElement.textContent = '$' + shipping.toFixed(2);
-    }
-    
-    // Update tax
-    const taxElement = document.querySelector('.tax');
-    if (taxElement) {
-        taxElement.textContent = '$' + tax;
     }
     
     // Update grand total
@@ -285,22 +278,70 @@ function clearCart() {
     });
 }
 
-// Apply promo code
-function applyPromo() {
-    const promoInput = document.querySelector('.promo-input');
-    const promoCode = promoInput.value.trim();
+
+
+// Handle shipping method selection
+function handleShippingChange() {
+    const selectedOption = document.querySelector('input[name="shipping_method"]:checked');
+    if (selectedOption) {
+        const cost = parseFloat(selectedOption.dataset.cost);
+        const method = selectedOption.value;
+        updateShippingCost(cost);
+        saveShippingSelection(method, cost);
+    }
+}
+
+// Save shipping selection to session
+function saveShippingSelection(method, cost) {
+    const formData = new FormData();
+    formData.append('shipping_method', method);
+    formData.append('shipping_cost', cost);
     
-    if (!promoCode) {
-        showNotification('Please enter a promo code', 'warning');
-        return;
+    fetch('/orders/set-shipping/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Shipping method saved: ' + method + ' - $' + cost);
+        }
+    })
+    .catch(error => console.error('Error saving shipping:', error));
+}
+
+// Update shipping cost in summary
+function updateShippingCost(cost) {
+    const shippingElement = document.querySelector('.shipping');
+    if (shippingElement) {
+        shippingElement.textContent = '$' + cost.toFixed(2);
     }
     
-    showNotification('Promo code "' + promoCode + '" applied! (Feature coming soon)', 'info');
-    promoInput.value = '';
+    // Recalculate grand total
+    const subtotal = parseFloat(document.querySelector('.subtotal').textContent.replace('$', ''));
+    const grandTotal = (subtotal + cost).toFixed(2);
+    
+    const grandTotalElement = document.querySelector('.grand-total');
+    if (grandTotalElement) {
+        grandTotalElement.textContent = '$' + grandTotal;
+        grandTotalElement.style.animation = 'pulse 0.4s ease';
+        setTimeout(() => {
+            grandTotalElement.style.animation = 'none';
+        }, 400);
+    }
 }
 
 // Initialize event listeners on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // Handle shipping method selection
+    const shippingOptions = document.querySelectorAll('input[name="shipping_method"]');
+    shippingOptions.forEach(option => {
+        option.addEventListener('change', handleShippingChange);
+    });
+
     // Handle clear cart button
     const clearCartBtn = document.getElementById('clear-cart-btn');
     if (clearCartBtn) {
@@ -359,21 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Handle promo button
-    const promoBtn = document.getElementById('apply-promo-btn');
-    if (promoBtn) {
-        promoBtn.addEventListener('click', applyPromo);
-        
-        // Allow Enter key to apply promo
-        const promoInput = document.querySelector('.promo-input');
-        if (promoInput) {
-            promoInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    applyPromo();
-                }
-            });
-        }
-    }
+
     
     // Add smooth animations to cart items
     const cartItems = document.querySelectorAll('.cart-item');

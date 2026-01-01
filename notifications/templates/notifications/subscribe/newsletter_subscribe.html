@@ -18,20 +18,6 @@
             <p>Stay updated with the latest LEGO releases, exclusive offers, and building tips.</p>
         </div>
 
-        {% if messages %}
-            {% for message in messages %}
-                {% if message.tags == 'error' %}
-                    <div class="error-message">
-                        {{ message }}
-                    </div>
-                {% else %}
-                    <div class="success-message">
-                        {{ message }}
-                    </div>
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-
         <form method="post" class="newsletter-form" novalidate>
             {% csrf_token %}
             
@@ -86,7 +72,7 @@
         </div>
 
         <div class="back-link">
-            <a href="{% url 'store:index' %}">Back to Home</a>
+            <a href="{% url 'core:index' %}">Back to Home</a>
         </div>
     </div>
 </div>

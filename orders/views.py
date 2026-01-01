@@ -26,21 +26,35 @@ class CartView(LoginRequiredMixin, TemplateView):
         context['cart_items'] = cart.items.all().select_related('product')
         context['total_price'] = cart.get_total_price()
         context['total_items'] = cart.get_total_items()
-        context['shipping_cost'] = Decimal('10.00') if cart.get_total_items() > 0 else Decimal('0')
-        context['tax'] = (context['total_price'] * Decimal('0.1')).quantize(Decimal('0.01'))
-        context['grand_total'] = context['total_price'] + context['shipping_cost'] + context['tax']
+        
+        # Get shipping cost from session or use default
+        shipping_cost_str = self.request.session.get('shipping_cost', '10.00')
+        try:
+            context['shipping_cost'] = Decimal(shipping_cost_str)
+        except:
+            context['shipping_cost'] = Decimal('10.00')
+        
+        context['grand_total'] = context['total_price'] + context['shipping_cost']
         
         return context
 
 
-class AddToCartView(LoginRequiredMixin, View):
+class AddToCartView(View):
     """
     Add a product to the user's cart (AJAX endpoint)
+    Requires authentication
     """
-    login_url = 'users:login'
 
     def post(self, request, *args, **kwargs):
         try:
+            # Check if user is authenticated
+            if not request.user.is_authenticated:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Please log in to add items to cart',
+                    'requires_login': True
+                }, status=401)
+            
             product_id = request.POST.get('product_id')
             
             # Validate product_id
@@ -81,30 +95,32 @@ class AddToCartView(LoginRequiredMixin, View):
                     'message': f'Only {product.stock} items available in stock'
                 }, status=400)
             
-            # Get or create cart
-            cart, created = Cart.objects.get_or_create(user=request.user)
-            
-            # Add or update cart item
-            try:
-                cart_item = CartItem.objects.get(cart=cart, product=product)
-                # Item already in cart, update quantity
-                cart_item.quantity += quantity
-                cart_item.save()
-            except CartItem.DoesNotExist:
-                # Create new cart item
-                cart_item = CartItem.objects.create(
-                    cart=cart,
-                    product=product,
-                    price=product.price,
-                    quantity=quantity
-                )
-            
-            return JsonResponse({
-                'success': True,
-                'message': f'{product.name} added to cart',
-                'cart_count': cart.get_total_items(),
-                'cart_total': str(cart.get_total_price())
-            })
+            if request.user.is_authenticated:
+                # For authenticated users, use database cart
+                cart, created = Cart.objects.get_or_create(user=request.user)
+                
+                # Add or update cart item
+                try:
+                    cart_item = CartItem.objects.get(cart=cart, product=product)
+                    # Item already in cart, update quantity
+                    cart_item.quantity += quantity
+                    cart_item.save()
+                except CartItem.DoesNotExist:
+                    # Create new cart item
+                    CartItem.objects.create(
+                        cart=cart,
+                        product=product,
+                        price=product.price,
+                        quantity=quantity
+                    )
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': f'{product.name} added to cart',
+                    'cart_count': cart.get_total_items(),
+                    'cart_total': str(cart.get_total_price()),
+                    'requires_login': False
+                })
         
         except Exception as e:
             import logging
@@ -254,9 +270,15 @@ class CheckoutView(LoginRequiredMixin, TemplateView):
             context['cart'] = cart
             context['cart_items'] = cart.items.all().select_related('product')
             context['total_price'] = cart.get_total_price()
-            context['shipping_cost'] = Decimal('10.00') if cart.get_total_items() > 0 else Decimal('0')
-            context['tax'] = (context['total_price'] * Decimal('0.1')).quantize(Decimal('0.01'))
-            context['grand_total'] = context['total_price'] + context['shipping_cost'] + context['tax']
+            
+            # Get shipping cost from session or use default
+            shipping_cost_str = self.request.session.get('shipping_cost', '10.00')
+            try:
+                context['shipping_cost'] = Decimal(shipping_cost_str)
+            except:
+                context['shipping_cost'] = Decimal('10.00')
+            
+            context['grand_total'] = context['total_price'] + context['shipping_cost']
             
             # Get or create customer
             customer, created = Customer.objects.get_or_create(user=self.request.user)
@@ -290,11 +312,15 @@ class PlaceOrderView(LoginRequiredMixin, View):
             customer.address = request.POST.get('address', customer.address)
             customer.save()
             
-            # Create order
-            shipping_cost = Decimal('10.00')
+            # Create order with shipping cost from session
+            shipping_cost_str = request.session.get('shipping_cost', '10.00')
+            try:
+                shipping_cost = Decimal(shipping_cost_str)
+            except:
+                shipping_cost = Decimal('10.00')
+            
             subtotal = cart.get_total_price()
-            tax = (subtotal * Decimal('0.1')).quantize(Decimal('0.01'))
-            total = subtotal + shipping_cost + tax
+            total = subtotal + shipping_cost
             
             order = Order.objects.create(
                 customer=customer,
@@ -352,8 +378,35 @@ class OrderConfirmationView(LoginRequiredMixin, DetailView):
         order = self.get_object()
         context['order_items'] = order.order_items.all()
         context['shipping_cost'] = Decimal('10.00')
-        # Calculate tax from total_price (total - shipping = subtotal, subtotal * 0.1 = tax)
-        subtotal = order.total_price - Decimal('10.00')
-        context['tax'] = (subtotal * Decimal('0.1')).quantize(Decimal('0.01'))
         
         return context
+
+
+class SetShippingView(LoginRequiredMixin, View):
+    """
+    Save selected shipping method and cost to session
+    """
+    login_url = 'users:login'
+    
+    def post(self, request, *args, **kwargs):
+        try:
+            shipping_method = request.POST.get('shipping_method')
+            shipping_cost = request.POST.get('shipping_cost')
+            
+            # Store in session
+            request.session['shipping_method'] = shipping_method
+            request.session['shipping_cost'] = shipping_cost
+            request.session.modified = True
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Shipping method set to {shipping_method}'
+            })
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f'Error in SetShippingView: {str(e)}', exc_info=True)
+            return JsonResponse({
+                'success': False,
+                'message': 'Error setting shipping method'
+            }, status=500)

@@ -79,7 +79,7 @@
 
 .btn-subscribe {
     padding: 12px 24px;
-    background: var(--primary);
+    background: #dc3545;
     color: white;
     border: none;
     border-radius: 6px;
@@ -91,7 +91,7 @@
 }
 
 .btn-subscribe:hover {
-    background: #3d5a9e;
+    background: #c82333;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(67, 97, 207, 0.3);
 }

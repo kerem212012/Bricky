@@ -98,7 +98,10 @@ function addToCart(e, productId) {
     // Check if user is authenticated - if not, redirect to login
     const isAuthenticated = document.body.dataset.authenticated === 'true';
     if (!isAuthenticated) {
-        window.location.href = '/users/login/';
+        showNotification('Please log in or register to add items to cart', 'info');
+        setTimeout(() => {
+            window.location.href = '/users/login/?next=' + window.location.pathname;
+        }, 1500);
         return;
     }
     

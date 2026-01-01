@@ -1,0 +1,124 @@
+/* Email verification template styles */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.email-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    padding: 40px;
+    text-align: center;
+}
+
+.email-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+
+p {
+    color: #666;
+    line-height: 1.6;
+    margin: 15px 0;
+    font-size: 14px;
+}
+
+.verification-code {
+    background: #f5f5f5;
+    border-left: 4px solid #667eea;
+    padding: 20px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin: 25px 0;
+    word-break: break-all;
+}
+
+.verification-code a {
+    color: #667eea;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.verification-code a:hover {
+    text-decoration: underline;
+}
+
+.timer {
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+    justify-content: center;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5568d3;
+}
+
+.btn-secondary {
+    background: #e9ecef;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background: #dee2e6;
+}
+
+@media (max-width: 480px) {
+    .email-container {
+        padding: 20px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 20px;
+    }
+
+    .email-icon {
+        font-size: 48px;
+    }
+}

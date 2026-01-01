@@ -1,0 +1,19 @@
+/* Order confirmation inline styles */
+
+.status-badge {
+    margin-bottom: 20px;
+}
+
+.status-badge strong {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.status-badge span {
+    padding: 5px 10px;
+    background: #2196f3;
+    color: white;
+    border-radius: 4px;
+    display: inline-block;
+    font-weight: 500;
+}

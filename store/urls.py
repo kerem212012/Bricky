@@ -4,9 +4,6 @@ from . import views
 app_name = "store"
 
 urlpatterns = [
-    # Home Page
-    path('', views.IndexView.as_view(), name='index'),
-    
     # Product Browsing Views
     path('category/<slug:slug>/', views.CategoryView.as_view(), name='category'),
     path('shop/', views.ShopView.as_view(), name='shop'),

@@ -29,9 +29,9 @@
                 <!-- Order Status -->
                 <div class="status-card">
                     <h3>Order Status</h3>
-                    <p class="status-badge" style="margin-bottom: 20px;">
+                    <p class="status-badge">
                         <strong>Current Status:</strong> 
-                        <span style="padding: 5px 10px; background: #2196f3; color: white; border-radius: 4px;">
+                        <span>
                             {{ order.get_status_display }}
                         </span>
                     </p>
@@ -227,5 +227,6 @@
 </div>
 
 <link rel="stylesheet" href="{% static 'core/css/order_confirmation.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/order-confirmation-inline.css' %}">
 <script src="{% static 'core/js/order_confirmation.js' %}"></script>
 {% endblock %}

@@ -1,0 +1,20 @@
+/* Password reset success styles */
+
+.success-header {
+    border-bottom: 3px solid #28a745 !important;
+}
+
+.success-header h1 {
+    color: #28a745;
+}
+
+.success-message {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 20px 0;
+    text-align: center;
+    font-weight: 500;
+}

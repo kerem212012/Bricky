@@ -36,8 +36,14 @@ function addToCart(productId, productName) {
         if (data.success) {
             showNotification(productName + ' added to cart', 'success');
             updateCartCount(data.cart_count);
+        } else if (data.requires_login) {
+            showNotification('Please log in or register to add items to cart', 'info');
+            // Optionally redirect to login page
+            setTimeout(() => {
+                window.location.href = '/users/login/?next=' + window.location.pathname;
+            }, 1500);
         } else {
-            showNotification(data.message, 'error');
+            showNotification(data.message || 'Failed to add to cart', 'error');
         }
     })
     .catch(error => {

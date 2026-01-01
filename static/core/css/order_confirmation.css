@@ -446,7 +446,7 @@
 
 .btn-subscribe {
     padding: 10px;
-    background: var(--primary);
+    background: #dc3545;
     color: white;
     border: none;
     border-radius: 6px;
@@ -457,7 +457,7 @@
 }
 
 .btn-subscribe:hover {
-    background: #cc0005;
+    background: #c82333;
 }
 
 /* Related Products */

@@ -1,15 +1,70 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, TemplateView, View, CreateView
+from django.shortcuts import  redirect
+from django.views.generic import ListView, TemplateView
 from django.db.models import Q
-from django.http import JsonResponse
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.urls import reverse_lazy
-import json
 
-from .models import ContactMessage, NewsletterSubscription
-from .forms import ContactForm, NewsletterSubscriptionForm
+from .models import ContactMessage
+from .forms import ContactForm
+from store.models import Product, Category
 
+
+# ============ HOME PAGE VIEW ============
+
+class IndexView(ListView):
+    """
+    Store main page showing all products with filters and categories
+    """
+    model = Product
+    template_name = 'core/index.html'
+    context_object_name = 'object_list'
+    paginate_by = 12
+
+    def get_queryset(self):
+        queryset = Product.objects.filter(is_active=True).select_related('category')
+        
+        # Filter by category
+        category_slug = self.request.GET.get('category')
+        if category_slug:
+            queryset = queryset.filter(category__slug=category_slug)
+        
+        # Search filter
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(name__icontains=search) | Q(description__icontains=search)
+            )
+        
+        # Price filter
+        min_price = self.request.GET.get('min_price')
+        max_price = self.request.GET.get('max_price')
+        
+        if min_price:
+            queryset = queryset.filter(price__gte=min_price)
+        if max_price:
+            queryset = queryset.filter(price__lte=max_price)
+        
+        # Sorting
+        sort = self.request.GET.get('sort', '-created_at')
+        queryset = queryset.order_by(sort)
+        
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()
+        context['selected_category'] = self.request.GET.get('category', '')
+        context['search_query'] = self.request.GET.get('search', '')
+        context['min_price'] = self.request.GET.get('min_price', '')
+        context['max_price'] = self.request.GET.get('max_price', '')
+        context['sort'] = self.request.GET.get('sort', '-created_at')
+        
+        # Price range for filter
+        products = Product.objects.filter(is_active=True)
+        if products.exists():
+            context['price_max'] = products.order_by('-price').first().price
+            context['price_min'] = products.order_by('price').first().price
+        
+        return context
 
 
 # ============ LEGAL & INFO PAGES ============
@@ -67,95 +122,3 @@ class ContactView(TemplateView):
             context['form'] = form
             return self.render_to_response(context)
 
-
-
-
-# ============ NEWSLETTER VIEWS ============
-class NewsletterSubscribeView(CreateView):
-    """
-    View for subscribing to the newsletter
-    """
-    model = NewsletterSubscription
-    form_class = NewsletterSubscriptionForm
-    template_name = 'notifications/subscribe/newsletter_subscribe.html'
-    success_url = reverse_lazy('core:newsletter_success')
-
-    def form_valid(self, form):
-        """Handle successful form submission"""
-        response = super().form_valid(form)
-        messages.success(
-            self.request,
-            'Thank you for subscribing to our newsletter! You\'ll receive updates soon.'
-        )
-        return response
-
-    def form_invalid(self, form):
-        """Handle form errors"""
-        for field, errors in form.errors.items():
-            for error in errors:
-                messages.error(self.request, f'{error}')
-        return self.render_to_response(self.get_context_data(form=form))
-
-
-class NewsletterSubscribeAjaxView(View):
-    """
-    AJAX view for subscribing to the newsletter
-    """
-    def post(self, request):
-        """Handle AJAX POST request"""
-        try:
-            data = json.loads(request.body)
-            email = data.get('email', '').strip().lower()
-
-            if not email:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Email is required.'
-                }, status=400)
-
-            # Check if already subscribed
-            if NewsletterSubscription.objects.filter(email=email, status='active').exists():
-                return JsonResponse({
-                    'success': False,
-                    'message': 'This email is already subscribed to our newsletter.'
-                }, status=400)
-
-            # Create subscription
-            subscription, created = NewsletterSubscription.objects.get_or_create(
-                email=email,
-                defaults={'status': 'active'}
-            )
-
-            if not created and subscription.status == 'unsubscribed':
-                # Reactivate unsubscribed email
-                subscription.status = 'active'
-                subscription.unsubscribed_at = None
-                subscription.save()
-
-            return JsonResponse({
-                'success': True,
-                'message': 'Thank you for subscribing to our newsletter!'
-            }, status=201)
-
-        except json.JSONDecodeError:
-            return JsonResponse({
-                'success': False,
-                'message': 'Invalid request format.'
-            }, status=400)
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'message': 'An error occurred. Please try again.'
-            }, status=500)
-
-
-class NewsletterSuccessView(TemplateView):
-    """
-    Success page after newsletter subscription
-    """
-    template_name = 'core/newsletter/success.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Newsletter Subscription Successful'
-        return context

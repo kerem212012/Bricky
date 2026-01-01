@@ -16,4 +16,5 @@ urlpatterns = [
     path('checkout/', views.CheckoutView.as_view(), name='checkout'),
     path('order/place/', views.PlaceOrderView.as_view(), name='place_order'),
     path('order/<uuid:order_uuid>/confirmation/', views.OrderConfirmationView.as_view(), name='order_confirmation'),
+    path('set-shipping/', views.SetShippingView.as_view(), name='set_shipping'),
 ]

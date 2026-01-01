@@ -15,7 +15,7 @@
         <div class="container">
             <h1><i class="fas fa-shopping-cart"></i> Shopping Cart</h1>
             <p class="breadcrumb">
-                <a href="{% url 'store:index' %}">Home</a> / 
+                <a href="{% url 'core:index' %}">Home</a> / 
                 <span>Shopping Cart</span>
             </p>
         </div>
@@ -112,13 +112,47 @@
                 </div>
 
                 <div class="summary-item">
-                    <span><i class="fas fa-truck"></i> Shipping</span>
-                    <span class="shipping">${{ shipping_cost }}</span>
+                    <span><i class="fas fa-truck"></i> Shipping Method</span>
+                </div>
+
+                <!-- Shipping Options -->
+                <div class="shipping-options">
+                    <label class="shipping-option">
+                        <input type="radio" name="shipping_method" value="standard" checked data-cost="10">
+                        <div class="shipping-option-content">
+                            <span class="shipping-name">Standard Shipping</span>
+                            <span class="shipping-time">3-5 business days</span>
+                        </div>
+                        <span class="shipping-price">$10.00</span>
+                    </label>
+                    <label class="shipping-option">
+                        <input type="radio" name="shipping_method" value="express" data-cost="20">
+                        <div class="shipping-option-content">
+                            <span class="shipping-name">Express Shipping</span>
+                            <span class="shipping-time">1-2 business days</span>
+                        </div>
+                        <span class="shipping-price">$20.00</span>
+                    </label>
+                    <label class="shipping-option">
+                        <input type="radio" name="shipping_method" value="overnight" data-cost="35">
+                        <div class="shipping-option-content">
+                            <span class="shipping-name">Overnight Shipping</span>
+                            <span class="shipping-time">Next business day</span>
+                        </div>
+                        <span class="shipping-price">$35.00</span>
+                    </label>
+                </div>
+
+                <div class="summary-divider"></div>
+
+                <div class="summary-item">
+                    <span>Subtotal</span>
+                    <span class="subtotal">${{ total_price }}</span>
                 </div>
 
                 <div class="summary-item">
-                    <span><i class="fas fa-percentage"></i> Tax (10%)</span>
-                    <span class="tax">${{ tax }}</span>
+                    <span>Shipping</span>
+                    <span class="shipping">${{ shipping_cost }}</span>
                 </div>
 
                 <div class="summary-divider"></div>
@@ -133,18 +167,8 @@
                     <a href="{% url 'store:shop' %}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Continue Shopping</a>
                 </div>
 
-                <!-- Promo Code -->
-                <div class="promo-section">
-                    <input type="text" placeholder="Enter promo code" class="promo-input" maxlength="20">
-                    <button class="btn-apply-promo" id="apply-promo-btn"><i class="fas fa-tag"></i></button>
-                </div>
-
                 <!-- Features -->
                 <div class="cart-features">
-                    <div class="feature">
-                        <i class="fas fa-shipping-fast"></i>
-                        <span>Free shipping over $50</span>
-                    </div>
                     <div class="feature">
                         <i class="fas fa-lock"></i>
                         <span>Secure checkout</span>

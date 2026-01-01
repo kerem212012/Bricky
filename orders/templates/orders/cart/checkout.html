@@ -10,7 +10,7 @@
         <div class="container">
             <h1>Checkout</h1>
             <p class="breadcrumb">
-                <a href="{% url 'store:index' %}">Home</a> / 
+                <a href="{% url 'core:index' %}">Home</a> / 
                 <a href="{% url 'orders:cart' %}">Cart</a> / 
                 <span>Checkout</span>
             </p>
@@ -76,40 +76,6 @@
                         <div class="form-group">
                             <label for="country">Country</label>
                             <input type="text" id="country" name="country" value="United States" required>
-                        </div>
-                    </fieldset>
-
-                    <!-- Shipping Method -->
-                    <fieldset class="form-section">
-                        <legend>Shipping Method</legend>
-
-                        <div class="shipping-options">
-                            <label class="shipping-option">
-                                <input type="radio" name="shipping" value="standard" checked>
-                                <div class="option-content">
-                                    <span class="option-title">Standard Shipping</span>
-                                    <span class="option-desc">5-7 business days</span>
-                                </div>
-                                <span class="option-price">$10.00</span>
-                            </label>
-
-                            <label class="shipping-option">
-                                <input type="radio" name="shipping" value="express">
-                                <div class="option-content">
-                                    <span class="option-title">Express Shipping</span>
-                                    <span class="option-desc">2-3 business days</span>
-                                </div>
-                                <span class="option-price">$25.00</span>
-                            </label>
-
-                            <label class="shipping-option">
-                                <input type="radio" name="shipping" value="overnight">
-                                <div class="option-content">
-                                    <span class="option-title">Overnight Shipping</span>
-                                    <span class="option-desc">Next business day</span>
-                                </div>
-                                <span class="option-price">$50.00</span>
-                            </label>
                         </div>
                     </fieldset>
 
@@ -213,11 +179,6 @@
                         <div class="summary-row">
                             <span>Shipping</span>
                             <span class="amount">${{ shipping_cost }}</span>
-                        </div>
-
-                        <div class="summary-row">
-                            <span>Tax (10%)</span>
-                            <span class="amount">${{ tax }}</span>
                         </div>
 
                         <div class="summary-row total">

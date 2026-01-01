@@ -169,7 +169,7 @@
                 <i class="fas fa-search"></i>
                 <h3>No products found</h3>
                 <p>Try adjusting your filters</p>
-                <a href="{% url 'store:index' %}" class="btn-primary">Clear Filters</a>
+                <a href="{% url 'core:index' %}" class="btn-primary">Clear Filters</a>
             </div>
             {% endif %}
         </div>
@@ -206,11 +206,6 @@
         <div class="container">
             <div class="features-grid">
                 <div class="feature">
-                    <i class="fas fa-truck"></i>
-                    <h3>Free Shipping</h3>
-                    <p>On orders over $50</p>
-                </div>
-                <div class="feature">
                     <i class="fas fa-lock"></i>
                     <h3>Secure Checkout</h3>
                     <p>100% secure transactions</p>
@@ -246,11 +241,11 @@
                 </div>
                 <div class="about-stats">
                     <div class="stat">
-                        <div class="stat-number">10,000+</div>
+                        <div class="stat-number">100+</div>
                         <p>Happy Customers</p>
                     </div>
                     <div class="stat">
-                        <div class="stat-number">500+</div>
+                        <div class="stat-number">3</div>
                         <p>Products</p>
                     </div>
                     <div class="stat">
@@ -268,7 +263,7 @@
             <div class="newsletter-content">
                 <h2>Subscribe to Our Newsletter</h2>
                 <p>Get exclusive deals and early access to new products</p>
-                <button class="btn-primary"><a href="{% url 'core:newsletter_subscribe' %}">Subscribe</a></button>
+                <button class="btn-primary"><a href="{% url 'notifications:newsletter_subscribe' %}">Subscribe</a></button>
                 <div id="newsletter-message" class="newsletter-message-container"></div>
             </div>
         </div>
