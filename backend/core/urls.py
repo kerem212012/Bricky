@@ -1,7 +1,3 @@
-"""URL configuration for core app.
-
-Handles content pages, legal documents, and contact functionality.
-"""
 from django.urls import path
 from core import views
 

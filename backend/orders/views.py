@@ -1,8 +1,3 @@
-"""Views for orders app.
-
-Handles shopping cart operations, checkout process, order creation,
-and order history management.
-"""
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import TemplateView, View, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,19 +9,15 @@ from store.models import Product
 from orders.models import Cart, CartItem, Customer, Order, OrderElement, Delivery
 from orders.models import Order, Customer, OrderElement
 
-
 # ===== Cart Views =====
 
 class CartView(LoginRequiredMixin, TemplateView):
-    """Display user's shopping cart with items and totals.
-    
-    Shows cart items, prices, shipping cost, and grand total.
-    Requires authentication.
-    """
+
     template_name = 'orders/cart/cart.html'
     login_url = 'users:login'
 
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
         cart, _ = Cart.objects.get_or_create(user=self.request.user)
         
@@ -44,35 +35,17 @@ class CartView(LoginRequiredMixin, TemplateView):
         return context
     
     def _get_shipping_cost(self):
-        """Helper to get shipping cost from session"""
+
         try:
             return Decimal(self.request.session.get('shipping_cost', '10.00'))
         except:
             return Decimal('10.00')
 
-
 class CartActionView(View):
-    """Base class for cart action views.
-    
-    Provides common functionality:
-    - Authentication checking
-    - Cart retrieval
-    - Standardized JSON responses
-    
-    Used by: AddToCartView, RemoveFromCartView, UpdateCartItemView, ClearCartView
-    """
+
     
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({
-                'success': False,
-                'message': 'Please log in to manage cart',
-                'requires_login': True
-            }, status=401)
-        return super().dispatch(request, *args, **kwargs)
-    
-    def get_cart(self):
-        """Get or create cart for current user"""
+
         cart, _ = Cart.objects.get_or_create(user=self.request.user)
         return cart
     
@@ -91,7 +64,7 @@ class CartActionView(View):
 
 class AddToCartView(CartActionView):
     """Add product to shopping cart.
-    
+
     AJAX endpoint that validates stock, creates or updates cart item.
     Returns JSON with success status and updated cart totals.
     """
@@ -128,7 +101,7 @@ class AddToCartView(CartActionView):
                 product=product,
                 defaults={'price': product.price, 'quantity': quantity}
             )
-            
+
             if not created:
                 cart_item.quantity += quantity
                 cart_item.save()
@@ -138,7 +111,7 @@ class AddToCartView(CartActionView):
                 f'{product.name} added to cart',
                 requires_login=False
             )
-        
+
         except Exception as e:
             import logging
             logging.getLogger(__name__).error(f'Cart error: {e}', exc_info=True)
@@ -147,7 +120,7 @@ class AddToCartView(CartActionView):
 
 class RemoveFromCartView(CartActionView):
     """Remove item from shopping cart.
-    
+
     AJAX endpoint that deletes cart item by ID.
     Returns JSON with success status and updated cart totals.
     """
@@ -180,7 +153,7 @@ class UpdateCartItemView(CartActionView):
         try:
             cart_item_id = request.POST.get('cart_item_id')
             quantity = int(request.POST.get('quantity', 1))
-            
+
             cart_item = CartItem.objects.get(
                 id=cart_item_id,
                 cart__user=request.user
@@ -212,13 +185,7 @@ class UpdateCartItemView(CartActionView):
         except Exception as e:
             return self.cart_response(False, str(e))
 
-
 class ClearCartView(CartActionView):
-    """Clear all items from cart.
-    
-    AJAX endpoint that removes all cart items.
-    Returns JSON with success status.
-    """
 
     def post(self, request, *args, **kwargs):
         try:
@@ -228,17 +195,10 @@ class ClearCartView(CartActionView):
         except Exception as e:
             return self.cart_response(False, str(e))
 
-
 # ===== Checkout Views =====
 
 class CheckoutView(LoginRequiredMixin, TemplateView):
-    """Display checkout page.
-    
-    GET: Show checkout form with cart items and shipping options
-    POST: Handle shipping method selection (AJAX)
-    
-    Requires authentication and non-empty cart.
-    """
+
     template_name = 'orders/cart/checkout.html'
     login_url = 'users:login'
 
@@ -263,7 +223,6 @@ class CheckoutView(LoginRequiredMixin, TemplateView):
         return context
     
     def post(self, request, *args, **kwargs):
-        """Handle shipping method selection via AJAX"""
         try:
             shipping_method = request.POST.get('shipping_method')
             shipping_cost = request.POST.get('shipping_cost')
@@ -293,15 +252,8 @@ class CheckoutView(LoginRequiredMixin, TemplateView):
         customer, _ = Customer.objects.get_or_create(user=self.request.user)
         return customer
 
-
 class PlaceOrderView(LoginRequiredMixin, View):
-    """Process checkout and create order.
-    
-    POST only: Creates order from cart items, updates customer info,
-    clears cart, and redirects to confirmation page.
-    
-    Validates non-empty cart before processing.
-    """
+
     login_url = 'users:login'
 
     def post(self, request, *args, **kwargs):
@@ -384,11 +336,10 @@ class OrderConfirmationView(LoginRequiredMixin, DetailView):
         context['shipping_cost'] = Decimal('10.00')
         return context
 
-
 # ============ ORDER LIST VIEW ============
 
 class OrderListView(LoginRequiredMixin, TemplateView):
-    """Display all user orders"""
+
     template_name = 'orders/order_list.html'
     login_url = 'users:login'
 

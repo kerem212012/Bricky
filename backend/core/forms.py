@@ -1,21 +1,11 @@
-"""Forms for core app.
-
-Handles contact form submissions from visitors.
-"""
 from django import forms
 from django.core.exceptions import ValidationError
 
 from .models import ContactMessage
 
-
 # ===== Contact Form =====
 
 class ContactForm(forms.ModelForm):
-    """Form for contact page submissions.
-    
-    Validates user input and creates ContactMessage records.
-    All fields except phone are required.
-    """
     class Meta:
         model = ContactMessage
         fields = ['name', 'email', 'phone', 'subject', 'message']
@@ -47,7 +37,6 @@ class ContactForm(forms.ModelForm):
         }
 
     def clean_name(self):
-        """Validate name field."""
         name = self.cleaned_data.get('name', '').strip()
         if not name:
             raise ValidationError('Name is required.')
@@ -58,21 +47,18 @@ class ContactForm(forms.ModelForm):
         return name
 
     def clean_email(self):
-        """Validate email field."""
         email = self.cleaned_data.get('email', '').strip()
         if not email:
             raise ValidationError('Email is required.')
         return email
 
     def clean_phone(self):
-        """Validate phone field (optional)."""
         phone = self.cleaned_data.get('phone', '').strip()
         if phone and len(phone) < 5:
             raise ValidationError('Phone number is not valid.')
         return phone if phone else None
 
     def clean_message(self):
-        """Validate message field."""
         message = self.cleaned_data.get('message', '').strip()
         if not message:
             raise ValidationError('Message is required.')
@@ -83,7 +69,6 @@ class ContactForm(forms.ModelForm):
         return message
 
     def clean(self):
-        """Additional cross-field validation."""
         cleaned_data = super().clean()
         return cleaned_data
 

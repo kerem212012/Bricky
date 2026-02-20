@@ -22,7 +22,11 @@ class IndexView(ListView):
     - Category filtering
     - Price range filtering
     - Search by name/description
-    - Multiple sorting options
+    - Multiple sorting options (newest, name, price, etc.)
+    - Pagination (12 items per page)
+    
+    URL Name: store:index
+    Template: core/index.html
     """
     model = Product
     template_name = 'core/index.html'
@@ -30,6 +34,18 @@ class IndexView(ListView):
     paginate_by = 12
 
     def get_queryset(self):
+        """Get filtered and sorted product queryset.
+        
+        Supports filters:
+        - category: Filter by category slug
+        - search: Filter by name or description
+        - min_price: Minimum product price
+        - max_price: Maximum product price
+        - sort: Sorting field (default: -created_at)
+        
+        Returns:
+            QuerySet of Product objects
+        """
         queryset = Product.objects.filter(is_active=True).select_related('category')
         
         # Category filter
@@ -59,8 +75,15 @@ class IndexView(ListView):
         return queryset
 
     def get_context_data(self, **kwargs):
+        """Get context data for index view.
+        
+        Includes categories, current filters, and price range statistics.
+        
+        Returns:
+            Context dictionary with products and filter options
+        """
         context = super().get_context_data(**kwargs)
-        context['categories'] = Category.objects.all()
+        context['categories'] = Category.objects.exclude(slug__exact='')
         context['selected_category'] = self.request.GET.get('category', '')
         context['search_query'] = self.request.GET.get('search', '')
         context['min_price'] = self.request.GET.get('min_price', '')
@@ -91,6 +114,13 @@ class ShopView(ListView):
     paginate_by = 20
 
     def get_queryset(self):
+        """Get filtered product queryset.
+        
+        Applies category, price, and availability filters.
+        
+        Returns:
+            QuerySet of active Product objects
+        """
         queryset = Product.objects.filter(is_active=True).select_related('category')
         
         # Category filter
@@ -125,8 +155,15 @@ class ShopView(ListView):
         return queryset
 
     def get_context_data(self, **kwargs):
+        """Get context data for shop view.
+        
+        Includes categories, selected filters, and product count.
+        
+        Returns:
+            Context dictionary with products and filter options
+        """
         context = super().get_context_data(**kwargs)
-        context['categories'] = Category.objects.all()
+        context['categories'] = Category.objects.exclude(slug__exact='')
         context['selected_categories'] = self.request.GET.getlist('category')
         context['min_price'] = self.request.GET.get('min_price', '')
         context['max_price'] = self.request.GET.get('max_price', '')
@@ -144,15 +181,29 @@ class CategoryView(ShopView):
     template_name = 'store/product/category.html'
     
     def get_queryset(self):
+        """Get filtered products for this category.
+        
+        Inherits filtering and sorting from parent ShopView.
+        
+        Returns:
+            QuerySet filtered by category slug
+        """
         queryset = super().get_queryset()
         category_slug = self.kwargs.get('slug')
         return queryset.filter(category__slug=category_slug)
     
     def get_context_data(self, **kwargs):
+        """Get context data for category view.
+        
+        Includes category information and related categories.
+        
+        Returns:
+            Context dictionary with category and related category info
+        """
         context = super().get_context_data(**kwargs)
         category_slug = self.kwargs.get('slug')
         context['category'] = get_object_or_404(Category, slug=category_slug)
-        context['other_categories'] = Category.objects.exclude(slug=category_slug)[:6]
+        context['other_categories'] = Category.objects.exclude(slug=category_slug).exclude(slug__exact='')[:6]
         
         all_products = Product.objects.filter(category__slug=category_slug, is_active=True)
         if all_products.exists():
@@ -230,6 +281,11 @@ class ProductDetailView(DetailView):
     template_name = 'store/product/product_detail.html'
     
     def get_queryset(self):
+        """Get only active products.
+        
+        Returns:
+            QuerySet of active Product objects
+        """
         return Product.objects.filter(is_active=True)
     
     def get_context_data(self, **kwargs):
@@ -273,6 +329,14 @@ class SearchView(ListView):
     paginate_by = 12
 
     def get_queryset(self):
+        """Get filtered product queryset for search results.
+        
+        Filters by name, description, or category title.
+        Requires minimum query length of 2 characters.
+        
+        Returns:
+            QuerySet of Product objects matching search criteria
+        """
         query = self.request.GET.get('q', '').strip()
         
         if not query or len(query) < 2:
@@ -286,6 +350,13 @@ class SearchView(ListView):
         ).select_related('category').distinct().order_by('-created_at')
 
     def get_context_data(self, **kwargs):
+        """Get context data for search view.
+        
+        Includes search query, result count, and related categories.
+        
+        Returns:
+            Context dictionary with search results and filters
+        """
         context = super().get_context_data(**kwargs)
         query = self.request.GET.get('q', '').strip()
         

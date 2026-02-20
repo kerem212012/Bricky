@@ -1,7 +1,3 @@
-"""URL configuration for store app.
-
-Handles product catalog, search, categories, and reviews.
-"""
 from django.urls import path
 from . import views
 

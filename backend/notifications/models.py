@@ -1,3 +1,8 @@
+"""Models for notifications app.
+
+Contains models for newsletter subscription management:
+- NewsletterSubscription: Email addresses with subscription status tracking
+"""
 import uuid
 from django.db import models
 
@@ -21,6 +26,7 @@ class NewsletterSubscription(models.Model):
     unsubscribed_at = models.DateTimeField(blank=True, null=True)
 
     def __str__(self) -> str:
+        """Return email and status as string representation."""
         return f"{self.email} - {self.status}"
 
     class Meta:

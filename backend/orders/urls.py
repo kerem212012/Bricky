@@ -1,7 +1,3 @@
-"""URL configuration for orders app.
-
-Handles shopping cart operations, checkout process, and order management.
-"""
 from django.urls import path
 from orders import views
 

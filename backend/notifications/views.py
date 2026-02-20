@@ -1,8 +1,3 @@
-"""Views for notifications app.
-
-Handles newsletter subscription and unsubscription via both
-traditional forms and AJAX requests.
-"""
 from django.views.generic import TemplateView, View
 from django.http import JsonResponse
 from django.contrib import messages
@@ -12,27 +7,20 @@ import json
 from notifications.models import NewsletterSubscription
 from notifications.forms import NewsletterSubscriptionForm
 
-
 # ===== Newsletter Views =====
 
 class NewsletterSubscribeView(View):
-    """Handle newsletter subscriptions.
-    
-    Supports both traditional form submissions and AJAX requests.
-    
-    GET: Display subscription form
-    POST: Process subscription (form or AJAX)
-    """
+
     
     def get(self, request):
-        """Display newsletter subscription form."""
+
         return TemplateView.as_view(
             template_name='notifications/subscribe/newsletter_subscribe.html',
             extra_context={'form': NewsletterSubscriptionForm()}
         )(request)
     
     def post(self, request):
-        """Process subscription request (form or AJAX)."""
+
         # Check if AJAX request
         is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
         
@@ -85,7 +73,7 @@ class NewsletterSubscribeView(View):
             )
     
     def _response(self, success, message, is_ajax, status=200):
-        """Unified response for AJAX and form submissions"""
+
         if is_ajax:
             return JsonResponse({
                 'success': success,
@@ -106,16 +94,11 @@ class NewsletterSubscribeView(View):
                 extra_context={'form': NewsletterSubscriptionForm()}
             )(self.request)
 
-
 class NewsletterUnsubscribeView(View):
-    """Handle newsletter unsubscriptions.
-    
-    AJAX-only endpoint for unsubscribing from newsletter.
-    Updates subscription status and timestamp.
-    """
+
     
     def post(self, request):
-        """Handle unsubscription"""
+
         try:
             data = json.loads(request.body)
             email = data.get('email', '').strip().lower()

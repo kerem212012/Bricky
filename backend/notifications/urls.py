@@ -1,7 +1,3 @@
-"""URL configuration for notifications app.
-
-Handles newsletter subscriptions and unsubscriptions.
-"""
 from django.urls import path
 from notifications import views
 

@@ -1,15 +1,9 @@
-"""Forms for store app.
-
-Handles product reviews and ratings.
-"""
 from django import forms
 from django.core.exceptions import ValidationError
 
 from .models import Review
 
-
 class ReviewForm(forms.ModelForm):
-    """Form for product reviews."""
     
     class Meta:
         model = Review
@@ -34,7 +28,6 @@ class ReviewForm(forms.ModelForm):
         }
 
     def clean_title(self):
-        """Validate review title."""
         title = self.cleaned_data.get('title', '').strip()
         if not title:
             raise ValidationError('Review title is required.')
@@ -45,7 +38,6 @@ class ReviewForm(forms.ModelForm):
         return title
 
     def clean_content(self):
-        """Validate review content."""
         content = self.cleaned_data.get('content', '').strip()
         if not content:
             raise ValidationError('Review content is required.')
@@ -56,7 +48,6 @@ class ReviewForm(forms.ModelForm):
         return content
 
     def clean_rating(self):
-        """Validate rating."""
         rating = self.cleaned_data.get('rating')
         try:
             rating_int = int(rating)

@@ -30,6 +30,7 @@ class CustomUser(AbstractUser):
 
 
     def __str__(self) -> str:
+        """Return username as string representation."""
         return self.username
 
     class Meta:

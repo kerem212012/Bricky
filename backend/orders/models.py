@@ -34,6 +34,7 @@ class Customer(models.Model):
     address: str = models.TextField(max_length=500,blank=True)
 
     def __str__(self) -> str:
+        """Return username as string representation."""
         return self.user.username
 
     class Meta:
@@ -70,9 +71,17 @@ class Order(models.Model):
                                 validators=[MinValueValidator(0)], default=0)
 
     def __str__(self):
+        """Return customer username and order status as string representation."""
         return f"{self.customer.user.username} | {self.status}"
 
     def calculate_total(self):
+        """Calculate and update order total from all order items.
+        
+        Sums up all OrderElement prices and saves to total_price field.
+        
+        Returns:
+            Total price as Decimal
+        """
         total = sum(item.total_price for item in self.order_items.all())
         self.total_price = total
         self.save(update_fields=["total_price"])
@@ -176,6 +185,7 @@ class Delivery(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
+        """Return delivery order ID and status as string representation."""
         return f"Delivery for Order {self.order.id} - {self.get_status_display()}"
 
     class Meta:
@@ -202,14 +212,23 @@ class Cart(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
+        """Return cart owner username as string representation."""
         return f"Cart for {self.user.username}"
 
     def get_total_price(self) -> Decimal:
-        """Calculate total cart value."""
+        """Calculate total cart value from all items.
+        
+        Returns:
+            Sum of all cart item totals (price * quantity)
+        """
         return sum(item.get_total_price() for item in self.items.all())
 
     def get_total_items(self) -> int:
-        """Get total number of items in cart."""
+        """Get total number of items in cart.
+        
+        Returns:
+            Sum of quantities of all items
+        """
         return sum(item.quantity for item in self.items.all())
 
     class Meta:
@@ -218,7 +237,11 @@ class Cart(models.Model):
 
 
 class CartItem(models.Model):
-    """Model representing individual items in a cart."""
+    """Model representing individual items in a shopping cart.
+    
+    Stores product references, quantity, and price at time of addition.
+    Links to Cart via foreign key (one-to-many relationship).
+    """
     
     id: uuid.UUID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     cart = models.ForeignKey(
@@ -237,10 +260,15 @@ class CartItem(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
+        """Return quantity and product name as string representation."""
         return f"{self.quantity}x {self.product.name}"
 
     def get_total_price(self) -> Decimal:
-        """Calculate total price for this item."""
+        """Calculate total price for this item.
+        
+        Returns:
+            price * quantity as Decimal
+        """
         return self.price * self.quantity
 
     class Meta:

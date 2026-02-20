@@ -20,9 +20,10 @@ class Category(models.Model):
     id: uuid.UUID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     picture = models.ImageField(blank=True, upload_to="categories", default="user_pictures/default.png")
     title: str= models.CharField(max_length=200,unique=True,db_index=True)
-    slug:str= models.SlugField(unique=True,db_index=True)
+    slug:str= models.SlugField(unique=True,db_index=True,blank=False,null=False)
 
     def __str__(self) -> str:
+        """Return category title as string representation."""
         return self.title
 
     class Meta:
@@ -53,7 +54,7 @@ class Product(models.Model):
     slug: str = models.SlugField(unique=True, db_index=True)
     description: str = models.TextField(blank=True)
     picture = models.ImageField(blank=True, upload_to="products", default="products/default.png")
-    price: float = models.DecimalField(max_digits=10, decimal_places=2)
+    price: Decimal = models.DecimalField(max_digits=10, decimal_places=2)
     stock: int = models.PositiveIntegerField(default=0)
     category = models.ForeignKey(
         Category,
@@ -65,9 +66,15 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
+        """Return product name as string representation."""
         return self.name
 
     def get_absolute_url(self):
+        """Get the absolute URL for this product's detail page.
+        
+        Returns:
+            URL path to product detail view
+        """
         from django.urls import reverse
         return reverse('store:product_detail', kwargs={'slug': self.slug})
 
@@ -111,6 +118,7 @@ class Review(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
+        """Return review product name and author as string representation."""
         return f"Review of {self.product.name} by {self.author.username}"
 
     class Meta:

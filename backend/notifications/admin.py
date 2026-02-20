@@ -1,16 +1,11 @@
-"""Admin interface for notifications app.
-
-Handles newsletter subscription management in Django admin.
-"""
 from django.contrib import admin
 from django.utils.html import format_html
 
 from notifications.models import NewsletterSubscription
 
-
 @admin.register(NewsletterSubscription)
 class NewsletterSubscriptionAdmin(admin.ModelAdmin):
-    """Admin interface for NewsletterSubscription model."""
+
     
     list_display = ('email', 'status_badge', 'subscribed_at', 'unsubscribed_at')
     list_filter = ('status', 'subscribed_at')
@@ -32,7 +27,7 @@ class NewsletterSubscriptionAdmin(admin.ModelAdmin):
     )
     
     def status_badge(self, obj):
-        """Display status as colored badge."""
+
         status_colors = {
             'active': '#28a745',
             'unsubscribed': '#6c757d',

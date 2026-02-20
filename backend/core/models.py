@@ -42,6 +42,7 @@ class ContactMessage(models.Model):
     replied_at = models.DateTimeField(blank=True, null=True)
 
     def __str__(self) -> str:
+        """Return name and subject as string representation."""
         return f"{self.name} - {self.subject}"
 
     class Meta:
@@ -72,6 +73,7 @@ class HelpCategory(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
+        """Return category title as string representation."""
         return self.title
 
     class Meta:
@@ -104,6 +106,7 @@ class HelpArticle(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
+        """Return category title and article title as string representation."""
         return f"{self.category.title} - {self.title}"
 
     class Meta:

@@ -1,7 +1,3 @@
-"""URL configuration for users app.
-
-Handles authentication, user profiles, email verification, and password reset.
-"""
 from django.urls import path
 from users import views
 

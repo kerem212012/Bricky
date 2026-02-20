@@ -1,9 +1,3 @@
-"""Utility functions for users app.
-
-Provides email sending functionality for:
-- Email verification during registration
-- Password reset requests
-"""
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -14,19 +8,10 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-
 # ===== Email Verification =====
 
 def send_verification_email(request, user):
-    """Send email verification link to user.
-    
-    Args:
-        request: HTTP request object for domain detection
-        user: CustomUser instance to send verification to
-        
-    Returns:
-        bool: True if email sent successfully, False otherwise
-    """
+
     try:
         # Ensure user is saved
         if not user.pk:
@@ -73,19 +58,10 @@ def send_verification_email(request, user):
         logging.getLogger(__name__).error(f"Email error: {e}", exc_info=True)
         return False
 
-
 # ===== Password Reset =====
 
 def send_password_reset_email(request, user):
-    """Send password reset link to user.
-    
-    Args:
-        request: HTTP request object for domain detection
-        user: CustomUser instance to send reset link to
-        
-    Returns:
-        bool: True if email sent successfully, False otherwise
-    """
+
     try:
         # Generate token
         token = default_token_generator.make_token(user)

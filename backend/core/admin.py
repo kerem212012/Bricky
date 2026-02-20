@@ -2,12 +2,9 @@ from django.contrib import admin
 from django.utils.html import format_html
 from .models import ContactMessage, HelpCategory, HelpArticle
 
-
 @admin.register(ContactMessage)
 class ContactMessageAdmin(admin.ModelAdmin):
-    """
-    Admin interface for ContactMessage model
-    """
+
     list_display = ('name', 'email', 'subject_display', 'status_badge', 'created_at')
     list_filter = ('status', 'subject', 'created_at')
     search_fields = ('name', 'email', 'subject', 'message')
@@ -33,12 +30,12 @@ class ContactMessageAdmin(admin.ModelAdmin):
     )
     
     def subject_display(self, obj):
-        """Display subject with label"""
+
         return obj.get_subject_display()
     subject_display.short_description = 'Subject'
     
     def status_badge(self, obj):
-        """Display status as colored badge"""
+
         status_colors = {
             'new': '#ffc107',
             'reading': '#17a2b8',

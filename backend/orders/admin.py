@@ -2,15 +2,15 @@ from django.contrib import admin
 from django.utils.html import format_html
 from orders.models import Customer, Order, OrderElement, Delivery, Cart, CartItem
 
-
 class OrderElementInline(admin.TabularInline):
+
     model = OrderElement
     extra = 1
     readonly_fields = ['total_price']
     fields = ['product', 'price', 'quantity', 'total_price']
 
-
 class DeliveryInline(admin.TabularInline):
+
     model = Delivery
     extra = 0
     readonly_fields = ['id', 'created_at', 'updated_at', 'status_badge']
@@ -18,7 +18,7 @@ class DeliveryInline(admin.TabularInline):
     can_delete = False
 
     def status_badge(self, obj):
-        """Display delivery status as colored badge"""
+
         status_colors = {
             'pending': '#ffc107',
             'in_transit': '#17a2b8',
@@ -35,24 +35,26 @@ class DeliveryInline(admin.TabularInline):
         )
     status_badge.short_description = 'Status'
 
-
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
+
     list_display = ['get_username', 'phone', 'get_orders_count']
     search_fields = ['user__username', 'user__email', 'phone']
     readonly_fields = ['id', 'user']
     
     def get_username(self, obj):
+
         return obj.user.username
     get_username.short_description = 'Username'
     
     def get_orders_count(self, obj):
+
         return obj.orders.count()
     get_orders_count.short_description = 'Orders'
 
-
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
+
     list_display = ['customer', 'status', 'total_price', 'registered_at']
     list_filter = ['status', 'registered_at', 'is_draft']
     search_fields = ['customer__user__username', 'address']
@@ -74,12 +76,9 @@ class OrderAdmin(admin.ModelAdmin):
         }),
     )
 
-
 @admin.register(Delivery)
 class DeliveryAdmin(admin.ModelAdmin):
-    """
-    Admin interface for Delivery model
-    """
+
     list_display = ['tracking_number', 'order', 'method', 'status_badge', 'estimated_delivery_date', 'actual_delivery_date']
     list_filter = ['status', 'method', 'created_at']
     search_fields = ['tracking_number', 'order__id', 'delivery_address']
@@ -107,7 +106,7 @@ class DeliveryAdmin(admin.ModelAdmin):
     )
 
     def status_badge(self, obj):
-        """Display delivery status as colored badge"""
+
         status_colors = {
             'pending': '#ffc107',
             'in_transit': '#17a2b8',
@@ -126,23 +125,22 @@ class DeliveryAdmin(admin.ModelAdmin):
 
 @admin.register(OrderElement)
 class OrderElementAdmin(admin.ModelAdmin):
+
     list_display = ['order', 'product', 'quantity', 'price', 'total_price']
     list_filter = ['order__status']
     search_fields = ['order__customer__user__username', 'product__name']
     readonly_fields = ['id']
 
-
 class CartItemInline(admin.TabularInline):
-    """Inline for cart items in cart admin."""
+
     model = CartItem
     extra = 0
     readonly_fields = ['product', 'price', 'added_at', 'updated_at']
     fields = ['product', 'quantity', 'price']
 
-
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
-    """Admin interface for Cart model."""
+
     
     list_display = ['user', 'get_total_items', 'get_total_price', 'created_at']
     readonly_fields = ['created_at', 'updated_at']
@@ -150,19 +148,18 @@ class CartAdmin(admin.ModelAdmin):
     inlines = [CartItemInline]
 
     def get_total_items(self, obj):
-        """Get total number of items."""
+
         return obj.get_total_items()
     get_total_items.short_description = 'Items'
 
     def get_total_price(self, obj):
-        """Get total price."""
+
         return f'${obj.get_total_price()}'
     get_total_price.short_description = 'Total Price'
 
-
 @admin.register(CartItem)
 class CartItemAdmin(admin.ModelAdmin):
-    """Admin interface for CartItem model."""
+
     
     list_display = ['product', 'cart', 'quantity', 'price', 'get_total_price', 'added_at']
     list_filter = ['added_at', 'updated_at']
@@ -170,6 +167,6 @@ class CartItemAdmin(admin.ModelAdmin):
     search_fields = ['product__name', 'cart__user__username']
 
     def get_total_price(self, obj):
-        """Get total price for item."""
+
         return f'${obj.get_total_price()}'
     get_total_price.short_description = 'Total'

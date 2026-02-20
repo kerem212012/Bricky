@@ -1,8 +1,3 @@
-"""Views for users app.
-
-Handles user authentication (login, register, logout), profile management,
-email verification, and password reset functionality.
-"""
 import uuid
 from django.contrib.auth import login, authenticate, logout, get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -21,23 +16,20 @@ from users.utils import send_verification_email, send_password_reset_email
 from orders.models import Order
 from notifications.models import NewsletterSubscription
 
-
 # ===== Authentication Views =====
 
 class LoginView(TemplateView):
-    """Handle user login.
-    
-    GET: Display login form
-    POST: Authenticate user and redirect to home
-    """
+
     template_name = 'users/auth/login.html'
 
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
         context['form'] = UserLoginForm(self.request.POST or None)
         return context
 
     def post(self, request, *args, **kwargs):
+
         form = UserLoginForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data.get("username")
@@ -48,21 +40,18 @@ class LoginView(TemplateView):
                 return redirect('store:index')
         return self.get(request, *args, **kwargs)
 
-
 class RegisterView(TemplateView):
-    """Handle user registration.
-    
-    GET: Display registration form
-    POST: Create new user account and send verification email
-    """
+
     template_name = 'users/auth/register.html'
 
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
         context['form'] = UserRegisterForm(self.request.POST or None)
         return context
 
     def post(self, request, *args, **kwargs):
+
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
@@ -80,30 +69,20 @@ class RegisterView(TemplateView):
         context['form'] = form
         return self.render_to_response(context)
 
-
 def user_logout(request):
-    """Log out current user and redirect to home page.
-    
-    Function-based view for simplicity.
-    """
+
     logout(request)
     return redirect('store:index')
-
 
 # ===== Profile Views =====
 
 class ProfileView(LoginRequiredMixin, TemplateView):
-    """Display user profile dashboard.
-    
-    Shows:
-    - User information
-    - Recent orders (last 5)
-    - Newsletter subscription status
-    """
+
     template_name = 'users/profile/dashboard.html'
     login_url = 'users:login'
 
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
         user = self.request.user
         
@@ -125,15 +104,8 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         
         return context
 
-
 class ProfileEditView(LoginRequiredMixin, UpdateView):
-    """Edit user profile information.
-    
-    Allows updating:
-    - Personal information
-    - Email address
-    - Password (optional)
-    """
+
     model = CustomUser
     template_name = 'users/profile/edit.html'
     form_class = ProfileEditForm
@@ -141,9 +113,11 @@ class ProfileEditView(LoginRequiredMixin, UpdateView):
     login_url = 'users:login'
 
     def get_object(self, queryset=None):
+
         return self.request.user
 
     def form_valid(self, form):
+
         user = form.save(commit=False)
         
         # Update password if provided
@@ -154,18 +128,14 @@ class ProfileEditView(LoginRequiredMixin, UpdateView):
         user.save()
         return super().form_valid(form)
 
-
 # ===== Email Verification Views =====
 
 class EmailVerifyView(TemplateView):
-    """Verify user email address via token link.
-    
-    Validates token from email link and marks email as verified.
-    Shows success or failure page based on token validity.
-    """
+
     template_name = 'users/email/verified_success.html'
 
     def get(self, request, uidb64, token, *args, **kwargs):
+
         User = get_user_model()
         
         try:
@@ -192,23 +162,20 @@ class EmailVerifyView(TemplateView):
             'show_resend': True
         })
 
-
 # ===== Password Reset Views =====
 
 class ForgotPasswordView(TemplateView):
-    """Request password reset link.
-    
-    GET: Display email input form
-    POST: Send password reset email with token link
-    """
+
     template_name = 'users/auth/forgot_password.html'
 
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
         context['form'] = ForgotPasswordForm(self.request.POST or None)
         return context
 
     def post(self, request, *args, **kwargs):
+
         form = ForgotPasswordForm(request.POST)
         context = self.get_context_data(**kwargs)
         
@@ -226,18 +193,12 @@ class ForgotPasswordView(TemplateView):
         context['form'] = form
         return self.render_to_response(context)
 
-
 class ResetPasswordView(TemplateView):
-    """Reset password with token.
-    
-    GET: Validate token and display password reset form
-    POST: Process new password and update user account
-    
-    Token expires after 24 hours (configurable in settings).
-    """
+
     template_name = 'users/auth/reset_password.html'
 
     def get(self, request, uidb64, token, *args, **kwargs):
+
         User = get_user_model()
         
         try:
@@ -265,6 +226,7 @@ class ResetPasswordView(TemplateView):
         })
 
     def post(self, request, uidb64, token, *args, **kwargs):
+
         User = get_user_model()
         
         try:
