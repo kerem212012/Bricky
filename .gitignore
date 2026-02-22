@@ -97,3 +97,4 @@ __pycache__/
 secrets/
 backend/media
 backend/staticfiles
+backend/db.sqlite3
