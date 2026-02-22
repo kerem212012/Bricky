@@ -1,6 +1,9 @@
 import os
 import sys
 
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+
 BASE_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..','backend')
 )
@@ -97,12 +100,19 @@ def create_user(message):
     Args:
         message: Telegram message containing user's email address
     """
+    email = message.text.strip()
+    try:
+        validate_email(email)
+    except ValidationError:
+        bot.send_message(message.chat.id, "İt isn't email try again:")
+        bot.register_next_step_handler(message, create_user)
+        return
     markup = types.InlineKeyboardMarkup()
     try:
         user = CustomUser.objects.get(email=message.text.strip())
         user.tg_id = message.chat.id
         user.save()
-        bot.send_message(message.chat.id, f"You login as {user[0].username}", reply_markup=markup)
+        bot.send_message(message.chat.id, f"You login as {user.username}", reply_markup=markup)
         create_cart(message.chat.id)
         menu(message)
     except CustomUser.DoesNotExist:
@@ -110,6 +120,13 @@ def create_user(message):
     except Exception as e:
         bot.send_message(message.chat.id, f"{e}")
 
+
+def start_register(message,email):
+    user_id = message.chat.id
+    reg_data[user_id] = {}
+    reg_state[user_id] = "password"
+    reg_data[user_id]["email"] = email
+    bot.send_message(user_id, text="Enter your password(without space):")
 
 def add_to_cart(tg_id, product_id):
     """Add product to user's shopping cart.
@@ -237,7 +254,7 @@ def start_edit_product(message,product_id,status):
             markup.add(btn)
     bot.send_message(user_id, text=f"Enter product {status} for edit it:")
 
-def start_edit_cat(message):
+def start_edit_cat(message,product_id,status):
     user_id = message.chat.id
     edit_cat_state[user_id] = status
     edit_cat_data[user_id] = {}
@@ -517,27 +534,31 @@ def callback_handler(call):
     if call.data == "admin":
         markup = types.InlineKeyboardMarkup()
         user = CustomUser.objects.get(tg_id=call.message.chat.id)
-        add_product_btn = types.InlineKeyboardButton(text="Add Product", callback_data=f"add_product")
-        add_cat_btn = types.InlineKeyboardButton(text="Add Category", callback_data=f"add_cat")
-        del_product_btn = types.InlineKeyboardButton(text="Delete Product", callback_data=f"show_products|del_product")
-        del_cat_btn = types.InlineKeyboardButton(text="Delete Category", callback_data=f"show_cat|del_cat")
-        edit_product_btn = types.InlineKeyboardButton(text="Edit Product", callback_data=f"show_product|edit_product")
-        edit_cat_btn = types.InlineKeyboardButton(text="Edit Category", callback_data=f"show_cat|edit_cat")
-
-        if user.is_superuser:
-            add_admin_btn = types.InlineKeyboardButton(text="Add Admin", callback_data=f"show_user|add_admin")
-            del_admin_btn = types.InlineKeyboardButton(text="Delete Admin", callback_data=f"show_user|del_admin")
-            markup.row(add_admin_btn)
-            markup.row(del_admin_btn)
-        markup.row(add_product_btn)
-        markup.row(add_cat_btn)
-        markup.row(del_product_btn)
-        markup.row(del_cat_btn)
-        markup.row(edit_product_btn)
-        markup.row(edit_cat_btn)
         menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
-        markup.row(menu_btn)
-        bot.send_message(call.message.chat.id, "Choose one:", reply_markup=markup)
+        if user.is_staff or user.is_superuser:
+            add_product_btn = types.InlineKeyboardButton(text="Add Product", callback_data=f"add_product")
+            add_cat_btn = types.InlineKeyboardButton(text="Add Category", callback_data=f"add_cat")
+            del_product_btn = types.InlineKeyboardButton(text="Delete Product", callback_data=f"show_products|del_product")
+            del_cat_btn = types.InlineKeyboardButton(text="Delete Category", callback_data=f"show_cat|del_cat")
+            edit_product_btn = types.InlineKeyboardButton(text="Edit Product", callback_data=f"show_product|edit_product")
+            edit_cat_btn = types.InlineKeyboardButton(text="Edit Category", callback_data=f"show_cat|edit_cat")
+
+            if user.is_superuser:
+                add_admin_btn = types.InlineKeyboardButton(text="Add Admin", callback_data=f"show_user|add_admin")
+                del_admin_btn = types.InlineKeyboardButton(text="Delete Admin", callback_data=f"show_user|del_admin")
+                markup.row(add_admin_btn)
+                markup.row(del_admin_btn)
+            markup.row(add_product_btn)
+            markup.row(add_cat_btn)
+            markup.row(del_product_btn)
+            markup.row(del_cat_btn)
+            markup.row(edit_product_btn)
+            markup.row(edit_cat_btn)
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "Choose one:", reply_markup=markup)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
     if call.data == "menu":
         menu(call.message)
     if call.data == "products":
@@ -642,179 +663,298 @@ def callback_handler(call):
         markup.row(cart_btn)
         bot.send_message(call.message.chat.id, text="You canceled paying", reply_markup=markup)
     if call.data == "add_product":
-        start_product_adding(call.message)
-    if call.data.split("|", 1)[0] == "category":
-        product_data[call.message.chat.id]["category"] = call.data.split("|", 1)[1]
-        info = product_data[call.message.chat.id]
         markup = types.InlineKeyboardMarkup()
-        confirm_btn = types.InlineKeyboardButton(text="Confirm", callback_data="finish_adding")
-        cancel_btn = types.InlineKeyboardButton(text="Cancel", callback_data="cancel_adding")
-        markup.row(confirm_btn)
-        markup.row(cancel_btn)
-        with open(f'../backend/media/{info["photo"]}', "rb") as photo:
-            bot.send_photo(call.message.chat.id, photo=photo,
-                           caption=f"Name:{info["name"]}\nDescription:{info["description"]}\nPrice:{info["price"]}\nCategory:{Category.objects.get(id=info["category"]).title}",
-                           reply_markup=markup)
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
+        menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
+        if user.is_staff or user.is_superuser:
+            start_product_adding(call.message)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
+
+    if call.data.split("|", 1)[0] == "category":
+        markup = types.InlineKeyboardMarkup()
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
+        menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
+        if user.is_staff or user.is_superuser:
+            product_data[call.message.chat.id]["category"] = call.data.split("|", 1)[1]
+            info = product_data[call.message.chat.id]
+            confirm_btn = types.InlineKeyboardButton(text="Confirm", callback_data="finish_adding")
+            cancel_btn = types.InlineKeyboardButton(text="Cancel", callback_data="cancel_adding")
+            markup.row(confirm_btn)
+            markup.row(cancel_btn)
+            with open(f'../backend/media/{info["photo"]}', "rb") as photo:
+                bot.send_photo(call.message.chat.id, photo=photo,
+                               caption=f"Name:{info["name"]}\nDescription:{info["description"]}\nPrice:{info["price"]}\nCategory:{Category.objects.get(id=info["category"]).title}",
+                               reply_markup=markup)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
+
     if call.data == "finish_adding":
         markup = types.InlineKeyboardMarkup()
-        info = product_data[call.message.chat.id]
-        slug = "-".join(info["name"].split(" "))
-        Product.objects.update_or_create(name=info["name"], description=info["description"],
-                                         price=Decimal(info["price"]),
-                                         category=Category.objects.get(id=info["category"]), picture=info["photo"],
-                                         slug=slug, status="N")
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
         menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
-        markup.row(menu_btn)
-        bot.send_message(call.message.chat.id, text="You added product", reply_markup=markup)
+        if user.is_staff or user.is_superuser:
+            info = product_data[call.message.chat.id]
+            slug = "-".join(info["name"].split(" "))
+            Product.objects.update_or_create(name=info["name"], description=info["description"],
+                                             price=Decimal(info["price"]),
+                                             category=Category.objects.get(id=info["category"]), picture=info["photo"],
+                                             slug=slug, status="N")
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, text="You added product", reply_markup=markup)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
+
     if call.data.split("|", 1)[0] == "show_products":
         markup = types.InlineKeyboardMarkup()
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
         menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
-        markup.row(menu_btn)
-        for product in Product.objects.all():
-            btn = types.InlineKeyboardButton(product.name, callback_data=f"{call.data.split("|", 1)[1]}|{product.id}")
-            markup.row(btn)
-        bot.send_message(call.message.chat.id, text="Choose one:", reply_markup=markup)
+        if user.is_staff or user.is_superuser:
+            markup.row(menu_btn)
+            for product in Product.objects.all():
+                btn = types.InlineKeyboardButton(product.name, callback_data=f"{call.data.split("|", 1)[1]}|{product.id}")
+                markup.row(btn)
+            bot.send_message(call.message.chat.id, text="Choose one:", reply_markup=markup)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
+
     if call.data.split("|", 1)[0] == "del_product":
         markup = types.InlineKeyboardMarkup()
-        product = Product.objects.get(id=call.data.split("|", 1)[1])
-        product.delete()
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
         menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
-        markup.row(menu_btn)
-        bot.send_message(call.message.chat.id, text="You deleted product", reply_markup=markup)
+        if user.is_staff or user.is_superuser:
+            product = Product.objects.get(id=call.data.split("|", 1)[1])
+            product.delete()
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, text="You deleted product", reply_markup=markup)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
     if call.data.split("|", 1)[0] == "show_cat":
         markup = types.InlineKeyboardMarkup()
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
         menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
-        markup.row(menu_btn)
-        for category in Category.objects.all():
-            btn = types.InlineKeyboardButton(category.title,
-                                             callback_data=f"{call.data.split("|", 1)[1]}|{category.id}")
-            markup.row(btn)
-        bot.send_message(call.message.chat.id, text="Choose one:", reply_markup=markup)
+        if user.is_staff or user.is_superuser:
+            markup.row(menu_btn)
+            for category in Category.objects.all():
+                btn = types.InlineKeyboardButton(category.title,
+                                                 callback_data=f"{call.data.split("|", 1)[1]}|{category.id}")
+                markup.row(btn)
+            bot.send_message(call.message.chat.id, text="Choose one:", reply_markup=markup)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
+
     if call.data.split("|", 1)[0] == "del_cat":
         markup = types.InlineKeyboardMarkup()
-        category = Category.objects.get(id=call.data.split("|", 1)[1])
-        category.delete()
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
         menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
-        markup.row(menu_btn)
-        bot.send_message(call.message.chat.id, text="You deleted category", reply_markup=markup)
+        if user.is_staff or user.is_superuser:
+            category = Category.objects.get(id=call.data.split("|", 1)[1])
+            category.delete()
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, text="You deleted category", reply_markup=markup)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
+
     if call.data.split("|", 1)[0] == "show_user":
         markup = types.InlineKeyboardMarkup()
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
         menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
-        markup.row(menu_btn)
-        if call.data.split("|", 1)[0] == "add_admin":
-            for user in CustomUser.objects.filter(is_staff=False, is_superuser=False):
-                btn = types.InlineKeyboardButton(user.username, callback_data=f"{call.data.split("|", 1)[1]}|{user.id}")
-                markup.row(btn)
+        if user.is_staff or user.is_superuser:
+            markup.row(menu_btn)
+            if call.data.split("|", 1)[0] == "add_admin":
+                for user in CustomUser.objects.filter(is_staff=False, is_superuser=False):
+                    btn = types.InlineKeyboardButton(user.username, callback_data=f"{call.data.split("|", 1)[1]}|{user.id}")
+                    markup.row(btn)
+            else:
+                for user in CustomUser.objects.filter(is_staff=True, is_superuser=False):
+                    btn = types.InlineKeyboardButton(user.username, callback_data=f"{call.data.split("|", 1)[1]}|{user.id}")
+                    markup.row(btn)
+            bot.send_message(call.message.chat.id, text="Choose one:", reply_markup=markup)
         else:
-            for user in CustomUser.objects.filter(is_staff=True, is_superuser=False):
-                btn = types.InlineKeyboardButton(user.username, callback_data=f"{call.data.split("|", 1)[1]}|{user.id}")
-                markup.row(btn)
-        bot.send_message(call.message.chat.id, text="Choose one:", reply_markup=markup)
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
+
     if call.data.split("|", 1)[0] == "add_admin":
         markup = types.InlineKeyboardMarkup()
-        user = CustomUser.objects.get(id=call.data.split("|", 1)[1])
-        user.is_staff = True
-        user.save()
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
         menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
-        markup.row(menu_btn)
-        bot.send_message(call.message.chat.id, text="You added admin", reply_markup=markup)
+        if user.is_staff or user.is_superuser:
+            user = CustomUser.objects.get(id=call.data.split("|", 1)[1])
+            user.is_staff = True
+            user.save()
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, text="You added admin", reply_markup=markup)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
+
     if call.data.split("|", 1)[0] == "del_admin":
         markup = types.InlineKeyboardMarkup()
-        user = User.objects.get(id=call.data.split("|", 1)[1])
-        user.is_staff = False
-        user.save()
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
         menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
-        markup.row(menu_btn)
-        bot.send_message(call.message.chat.id, text="You delete admin", reply_markup=markup)
+        if user.is_staff or user.is_superuser:
+            user = User.objects.get(id=call.data.split("|", 1)[1])
+            user.is_staff = False
+            user.save()
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, text="You delete admin", reply_markup=markup)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
+
+
     if call.data == "add_cat":
-        start_cat_adding(call.message)
+        markup = types.InlineKeyboardMarkup()
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
+        menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
+        if user.is_staff or user.is_superuser:
+            start_cat_adding(call.message)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
+
     if call.data == "finish_cat":
         markup = types.InlineKeyboardMarkup()
-        info = cat_data[call.message.chat.id]
-        Category.objects.update_or_create(title=info["title"], picture=info["picture"])
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
         menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
-        markup.row(menu_btn)
-        bot.send_message(call.message.chat.id, text="You added category", reply_markup=markup)
+        if user.is_staff or user.is_superuser:
+            info = cat_data[call.message.chat.id]
+            Category.objects.update_or_create(title=info["title"], picture=info["picture"])
+            menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, text="You added category", reply_markup=markup)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
     if call.data.split("|", 1)[0] == "edit_product":
         markup = types.InlineKeyboardMarkup()
-        product = Product.objects.get(id=call.data.split("|", 1)[1])
-        name_btn = types.InlineKeyboardButton(f"Name: {product.name}",
-                                              callback_data=f"start_edit_product|{product.id}|name")
-        description_btn = types.InlineKeyboardButton(f"Description: {product.description}",
-                                                     callback_data=f"start_edit_product|{product.id}|des")
-
-        price_btn = types.InlineKeyboardButton(f"Price: {product.price}",
-                                               callback_data=f"start_edit_product|{product.id}|price")
-        picture_btn = types.InlineKeyboardButton(f"Picture",
-                                                 callback_data=f"start_edit_product|{product.id}|picture")
-        stock_btn = types.InlineKeyboardButton(f"Stock: {product.stock}",
-                                               callback_data=f"start_edit_product|{product.id}|stock")
-        cat_btn = types.InlineKeyboardButton(f"Category: {product.category.title}",
-                                             callback_data=f"start_edit_product|{product.id}|category")
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
         menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
-        markup.row(menu_btn)
-        markup.row(name_btn)
-        markup.row(description_btn)
-        markup.row(picture_btn)
-        markup.row(stock_btn)
-        markup.row(price_btn)
-        markup.row(cat_btn)
-        bot.send_message(call.message.chat.id, text="Choose thing you'll edit:", reply_markup=markup)
+        if user.is_staff or user.is_superuser:
+            product = Product.objects.get(id=call.data.split("|", 1)[1])
+            name_btn = types.InlineKeyboardButton(f"Name: {product.name}",
+                                                  callback_data=f"start_edit_product|{product.id}|name")
+            description_btn = types.InlineKeyboardButton(f"Description: {product.description}",
+                                                         callback_data=f"start_edit_product|{product.id}|des")
+
+            price_btn = types.InlineKeyboardButton(f"Price: {product.price}",
+                                                   callback_data=f"start_edit_product|{product.id}|price")
+            picture_btn = types.InlineKeyboardButton(f"Picture",
+                                                     callback_data=f"start_edit_product|{product.id}|picture")
+            stock_btn = types.InlineKeyboardButton(f"Stock: {product.stock}",
+                                                   callback_data=f"start_edit_product|{product.id}|stock")
+            cat_btn = types.InlineKeyboardButton(f"Category: {product.category.title}",
+                                                 callback_data=f"start_edit_product|{product.id}|category")
+            menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
+            markup.row(menu_btn)
+            markup.row(name_btn)
+            markup.row(description_btn)
+            markup.row(picture_btn)
+            markup.row(stock_btn)
+            markup.row(price_btn)
+            markup.row(cat_btn)
+            bot.send_message(call.message.chat.id, text="Choose thing you'll edit:", reply_markup=markup)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
+
     if call.data.split("|")[0] == "start_edit_product":
-        status = call.data.split("|")[2]
-        if call.data.split("|")[2] == "des":
-            status = "description"
-        start_edit_product(call.message, call.data.split("|")[1], status)
+        markup = types.InlineKeyboardMarkup()
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
+        menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
+        if user.is_staff or user.is_superuser:
+            status = call.data.split("|")[2]
+            if call.data.split("|")[2] == "des":
+                status = "description"
+            start_edit_product(call.message, call.data.split("|")[1], status)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
+
     if call.data.split("|")[0] == "finish_edit_product":
         markup = types.InlineKeyboardMarkup()
-        info = edit_product_data[call.message.chat.id]
-        product = Product.objects.get(id=info["product"])
-        if call.data.split("|")[1] == "category":
-            product.category.id = call.data.split("|")[2]
-            product.save()
-        elif call.data.split("|")[1] == "name":
-            product.name = info[call.data.split("|")[1]]
-            product.save()
-        elif call.data.split("|")[1] == "description":
-            product.description = info[call.data.split("|")[1]]
-            product.save()
-        elif call.data.split("|")[1] == "price":
-            product.price = info[call.data.split("|")[1]]
-            product.save()
-        elif call.data.split("|")[1] == "picture":
-            product.picture = info[call.data.split("|")[1]]
-            product.save()
-        elif call.data.split("|")[1] == "stock":
-            product.stock = info[call.data.split("|")[1]]
-            product.save()
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
         menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
-        markup.row(menu_btn)
-        bot.send_message(call.message.chat.id, text="You edited product", reply_markup=markup)
+        if user.is_staff or user.is_superuser:
+            info = edit_product_data[call.message.chat.id]
+            product = Product.objects.get(id=info["product"])
+            if call.data.split("|")[1] == "category":
+                product.category.id = call.data.split("|")[2]
+                product.save()
+            elif call.data.split("|")[1] == "name":
+                product.name = info[call.data.split("|")[1]]
+                product.save()
+            elif call.data.split("|")[1] == "description":
+                product.description = info[call.data.split("|")[1]]
+                product.save()
+            elif call.data.split("|")[1] == "price":
+                product.price = info[call.data.split("|")[1]]
+                product.save()
+            elif call.data.split("|")[1] == "picture":
+                product.picture = info[call.data.split("|")[1]]
+                product.save()
+            elif call.data.split("|")[1] == "stock":
+                product.stock = info[call.data.split("|")[1]]
+                product.save()
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, text="You edited product", reply_markup=markup)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
+
+
     if call.data.split("|", 1)[0] == "edit_cat":
         markup = types.InlineKeyboardMarkup()
-        cat = Category.objects.get(id=call.data.split("|", 1)[1])
-        name_btn = types.InlineKeyboardButton(f"Title: {cat.name}", callback_data=f"start_edit_cat|{cat.id}|title")
-        picture_btn = types.InlineKeyboardButton(f"Picture",
-                                                 callback_data=f"start_edit_cat|{cat.id}|picture")
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
         menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
-        markup.row(menu_btn)
-        markup.row(name_btn)
-        markup.row(picture_btn)
-        bot.send_message(call.message.chat.id, text="Choose thing you'll edit:", reply_markup=markup)
+        if user.is_staff or user.is_superuser:
+            cat = Category.objects.get(id=call.data.split("|", 1)[1])
+            name_btn = types.InlineKeyboardButton(f"Title: {cat.name}", callback_data=f"start_edit_cat|{cat.id}|title")
+            picture_btn = types.InlineKeyboardButton(f"Picture",
+                                                     callback_data=f"start_edit_cat|{cat.id}|picture")
+            markup.row(menu_btn)
+            markup.row(name_btn)
+            markup.row(picture_btn)
+            bot.send_message(call.message.chat.id, text="Choose thing you'll edit:", reply_markup=markup)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
+
+
     if call.data.split("|")[0] == "start_edit_cat":
-        status = call.data.split("|")[2]
-        start_edit_cat(call.message, call.data.split("|")[1], status)
+        markup = types.InlineKeyboardMarkup()
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
+        menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
+        if user.is_staff or user.is_superuser:
+            status = call.data.split("|")[2]
+            start_edit_cat(call.message, call.data.split("|")[1], status)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
     if call.data.split("|")[0] == "finish_edit_product":
         markup = types.InlineKeyboardMarkup()
-        info = edit_product_data[call.message.chat.id]
-        cat = Category.objects.get(id=info["cat"])
-        if call.data.split("|")[1] == "title":
-            cat.name = info[call.data.split("|")[1]]
-            cat.save()
-        elif call.data.split("|")[1] == "picture":
-            cat.picture = info[call.data.split("|")[1]]
-            cat.save()
+        user = CustomUser.objects.get(tg_id=call.message.chat.id)
         menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
-        markup.row(menu_btn)
-        bot.send_message(call.message.chat.id, text="You edited product", reply_markup=markup)
+        if user.is_staff or user.is_superuser:
+            info = edit_product_data[call.message.chat.id]
+            cat = Category.objects.get(id=info["cat"])
+            if call.data.split("|")[1] == "title":
+                cat.name = info[call.data.split("|")[1]]
+                cat.save()
+            elif call.data.split("|")[1] == "picture":
+                cat.picture = info[call.data.split("|")[1]]
+                cat.save()
+            menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, text="You edited product", reply_markup=markup)
+        else:
+            markup.row(menu_btn)
+            bot.send_message(call.message.chat.id, "You aren't a admin:", reply_markup=markup)
 bot.infinity_polling()
