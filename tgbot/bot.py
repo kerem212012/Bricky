@@ -1,3 +1,10 @@
+"""Telegram bot for Bricky LEGO store.
+
+Provides automated responses and customer service through Telegram:
+- Product information
+- Order tracking
+- Customer support
+"""
 import os
 import sys
 

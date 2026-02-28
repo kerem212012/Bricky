@@ -1,3 +1,8 @@
+"""Forms for core app.
+
+Contains forms for:
+- Contact message submission
+"""
 from django import forms
 from django.core.exceptions import ValidationError
 

@@ -1,3 +1,11 @@
+"""URL patterns for core app.
+
+Defines routes for:
+- Homepage
+- Contact form
+- Help/FAQ pages
+- General pages
+"""
 from django.urls import path
 from core import views
 

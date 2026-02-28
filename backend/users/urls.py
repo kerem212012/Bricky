@@ -1,3 +1,11 @@
+"""URL patterns for users app.
+
+Defines routes for:
+- User registration and authentication
+- Profile management
+- Email verification
+- Password reset
+"""
 from django.urls import path
 from users import views
 

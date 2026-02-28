@@ -1,3 +1,8 @@
+"""Utility script to fix categories with empty slugs.
+
+Automatic slug generation for categories in database.
+Run: python fix_categories.py
+"""
 #!/usr/bin/env python
 import os
 import django

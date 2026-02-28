@@ -1,3 +1,12 @@
+"""URL patterns for store app.
+
+Defines routes for:
+- Product catalog browsing
+- Category filtering
+- Search functionality
+- Product details
+- Review management
+"""
 from django.urls import path
 from . import views
 

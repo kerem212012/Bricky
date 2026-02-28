@@ -1,3 +1,8 @@
+"""Forms for notifications app.
+
+Contains forms for:
+- Newsletter subscription management
+"""
 from django import forms
 from django.core.exceptions import ValidationError
 

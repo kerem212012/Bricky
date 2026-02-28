@@ -1,3 +1,7 @@
+"""Django app configuration for users app.
+
+Handles user authentication, profile management, and registration.
+"""
 
 from django.apps import AppConfig
 

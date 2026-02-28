@@ -1,3 +1,9 @@
+"""Admin configuration for users app.
+
+Customizes Django admin interface for:
+- Custom user model management
+- User profile display and filtering
+"""
 from django.contrib import admin
 from users.models import CustomUser
 

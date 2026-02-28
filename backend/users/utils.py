@@ -1,3 +1,11 @@
+"""Utility functions for users app.
+
+Provides helper functions for:
+- Email sending
+- Email verification
+- Password reset via email
+- Token generation
+"""
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator

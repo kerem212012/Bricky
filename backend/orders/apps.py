@@ -1,3 +1,7 @@
+"""Django app configuration for orders app.
+
+Handles shopping cart, checkout, and order management.
+"""
 
 from django.apps import AppConfig
 

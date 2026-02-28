@@ -1,3 +1,11 @@
+"""Forms for users app.
+
+Contains forms for:
+- User registration and authentication
+- Profile management and updates
+- Email verification
+- Password management
+"""
 from django import forms
 from django.contrib.auth import get_user_model
 from phonenumber_field.formfields import PhoneNumberField

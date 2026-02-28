@@ -1,3 +1,8 @@
+"""Forms for store app.
+
+Contains forms for:
+- Product reviews and ratings
+"""
 from django import forms
 from django.core.exceptions import ValidationError
 

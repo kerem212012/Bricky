@@ -1,3 +1,9 @@
+"""Admin configuration for core app.
+
+Customizes Django admin interface for:
+- Contact message management
+- Help category and article management
+"""
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import ContactMessage, HelpCategory, HelpArticle

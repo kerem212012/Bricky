@@ -1,3 +1,9 @@
+"""Custom Django template filters for core app.
+
+Provides custom filters for:
+- Mathematical operations in templates
+- String formatting
+"""
 from django import template
 
 register = template.Library()

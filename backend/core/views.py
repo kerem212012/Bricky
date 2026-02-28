@@ -1,3 +1,10 @@
+"""Views for core app.
+
+Handles main site pages and contact management:
+- Homepage and general pages
+- Contact form processing
+- Error pages
+"""
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 from django.contrib import messages

@@ -1,3 +1,9 @@
+"""Django signals for orders app.
+
+Handles automatic operations triggered by model changes:
+- Customer creation when user registers
+- Order status updates
+"""
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 

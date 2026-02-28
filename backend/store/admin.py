@@ -1,3 +1,10 @@
+"""Admin configuration for store app.
+
+Customizes Django admin interface for:
+- Product catalog management
+- Category organization
+- Review moderation
+"""
 from django.contrib import admin
 from django.utils.html import format_html
 from store.models import Category, Product, Review

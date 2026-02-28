@@ -1,3 +1,10 @@
+"""Views for notifications app.
+
+Handles newsletter subscription management:
+- Newsletter subscription and unsubscription
+- Email validation
+- Subscription status tracking
+"""
 from django.views.generic import TemplateView, View
 from django.http import JsonResponse
 from django.contrib import messages

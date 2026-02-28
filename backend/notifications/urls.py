@@ -1,3 +1,9 @@
+"""URL patterns for notifications app.
+
+Defines routes for:
+- Newsletter subscription
+- Newsletter unsubscription
+"""
 from django.urls import path
 from notifications import views
 

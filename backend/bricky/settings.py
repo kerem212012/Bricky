@@ -1,3 +1,7 @@
+"""Django settings for Bricky LEGO store project.
+
+Environment-based configuration for development and production.
+"""
 import os
 from pathlib import Path
 

@@ -1,3 +1,7 @@
+"""Django app configuration for notifications app.
+
+Handles newsletter subscription management.
+"""
 
 from django.apps import AppConfig
 

@@ -1,3 +1,11 @@
+"""Admin configuration for orders app.
+
+Customizes Django admin interface for:
+- Order management and tracking
+- Customer information
+- Cart and checkout management
+- Delivery information
+"""
 from django.contrib import admin
 from django.utils.html import format_html
 from orders.models import Customer, Order, OrderElement, Delivery, Cart, CartItem

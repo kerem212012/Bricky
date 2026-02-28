@@ -1,3 +1,11 @@
+"""Views for users app.
+
+Handles user authentication, profile management, and account operations:
+- User registration and login
+- Email verification
+- Profile updates
+- Password management
+"""
 import uuid
 from django.contrib.auth import login, authenticate, logout, get_user_model
 from django.contrib.auth.tokens import default_token_generator

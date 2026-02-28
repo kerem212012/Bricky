@@ -1,3 +1,7 @@
+"""Django app configuration for store app.
+
+Handles product catalog, categories, and reviews.
+"""
 
 from django.apps import AppConfig
 

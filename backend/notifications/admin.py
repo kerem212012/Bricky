@@ -1,3 +1,9 @@
+"""Admin configuration for notifications app.
+
+Customizes Django admin interface for:
+- Newsletter subscription management
+- Subscriber list and status tracking
+"""
 from django.contrib import admin
 from django.utils.html import format_html
 
