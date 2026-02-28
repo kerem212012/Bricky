@@ -228,7 +228,7 @@ def start_cat_adding(message):
     user_id = message.chat.id
     cat_data[user_id] = {}
     cat_state[user_id] = "title"
-    bot.send_message(user_id, text="Enter product name:")
+    bot.send_message(user_id, text="Enter category name:")
 
 def start_product_adding(message):
     """Initiate product creation workflow.
@@ -393,7 +393,7 @@ def handle_cat_steps(message):
         file_path = bot.get_file(message.photo[-1].file_id).file_path
         file = bot.download_file(file_path)
         with open(f"../backend/media/categories/{message.photo[-1].file_unique_id}.png", "wb") as code:
-            cat_data[user_id]["picture"] = f"{message.photo[-1].file_unique_id}.png"
+            cat_data[user_id]["picture"] = f"categories/{message.photo[-1].file_unique_id}.png"
             code.write(file)
 
         del cat_state[user_id]
@@ -403,7 +403,7 @@ def handle_cat_steps(message):
         cancel_btn = types.InlineKeyboardButton(text="Cancel", callback_data="menu")
         markup.row(confirm_btn)
         markup.row(cancel_btn)
-        with open(f'../backend/media/categories/{info["picture"]}', "rb") as photo:
+        with open(f'../backend/media/{info["picture"]}', "rb") as photo:
             bot.send_photo(message.chat.id, photo=photo, caption=f"Name:{info["title"]}", reply_markup=markup)
 
 
@@ -422,7 +422,7 @@ def handle_product_steps(message):
     if state == "name":
         product_data[user_id]["name"] = message.text.strip()
         product_state[user_id] = "description"
-        del product_state[user_id]
+        bot.send_message(user_id, text="Enter product description:")
     elif state == "description":
         product_data[user_id]["description"] = message.text.strip()
         product_state[user_id] = "price"
@@ -435,13 +435,12 @@ def handle_product_steps(message):
         file_path = bot.get_file(message.photo[-1].file_id).file_path
         file = bot.download_file(file_path)
         with open(f"../backend/media/products/{message.photo[-1].file_unique_id}.png", "wb") as code:
-            product_data[user_id]["photo"] = f"{message.photo[-1].file_unique_id}.png"
+            product_data[user_id]["photo"] = f"products/{message.photo[-1].file_unique_id}.png"
             code.write(file)
         del product_state[user_id]
-        info = product_data[user_id]
         markup = types.InlineKeyboardMarkup()
         for cat in Category.objects.all():
-            btn = types.InlineKeyboardButton(text=cat.name, callback_data="category")
+            btn = types.InlineKeyboardButton(text=cat.title, callback_data=f"category|{cat.id}")
             markup.add(btn)
         bot.send_message(user_id, text="Select a category:", reply_markup=markup)
 
@@ -826,7 +825,8 @@ def callback_handler(call):
         menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
         if user.is_staff or user.is_superuser:
             info = cat_data[call.message.chat.id]
-            Category.objects.update_or_create(title=info["title"], picture=info["picture"])
+            slug = "-".join(info["title"].split(" "))
+            Category.objects.update_or_create(title=info["title"], picture=info["picture"],slug=slug)
             menu_btn = types.InlineKeyboardButton("Menu", callback_data="menu")
             markup.row(menu_btn)
             bot.send_message(call.message.chat.id, text="You added category", reply_markup=markup)

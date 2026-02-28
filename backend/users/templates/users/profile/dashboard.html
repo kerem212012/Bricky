@@ -123,8 +123,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const email = this.dataset.email;
             const action = this.dataset.action;
             const url = action === 'subscribe' 
-                ? '{% url "notifications:newsletter_subscribe_ajax" %}'
-                : '{% url "notifications:newsletter_unsubscribe_ajax" %}';
+                ? '{% url "notifications:newsletter_subscribe" %}'
+                : '{% url "notifications:newsletter_unsubscribe" %}';
             
             const payload = JSON.stringify({ email: email });
             

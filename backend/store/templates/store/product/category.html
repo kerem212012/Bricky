@@ -47,7 +47,7 @@
             <aside class="category-sidebar">
                 <div class="sidebar-header">
                     <h3>Filters</h3>
-                    <a href="{% url 'store:category' category.slug %}" class="clear-filters">Clear</a>
+                    {% if category.slug %}<a href="{% url 'store:category' category.slug %}" class="clear-filters">Clear</a>{% endif %}
                 </div>
 
                 <form method="get" class="category-filters">

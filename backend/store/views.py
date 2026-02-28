@@ -83,7 +83,7 @@ class IndexView(ListView):
             Context dictionary with products and filter options
         """
         context = super().get_context_data(**kwargs)
-        context['categories'] = Category.objects.exclude(slug__exact='')
+        context['categories'] = Category.objects.exclude(slug__exact='').order_by('title')
         context['selected_category'] = self.request.GET.get('category', '')
         context['search_query'] = self.request.GET.get('search', '')
         context['min_price'] = self.request.GET.get('min_price', '')
@@ -223,6 +223,7 @@ class NewReleasesView(ShopView):
     Supports status filtering and sorting.
     """
     template_name = 'store/shop/new_releases.html'
+    context_object_name = 'products'
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -237,6 +238,28 @@ class NewReleasesView(ShopView):
             queryset = queryset.filter(status=status_map[status])
         
         return queryset
+    
+    def get_context_data(self, **kwargs):
+        """Get context data for new releases view.
+        
+        Includes products by status for stats display.
+        
+        Returns:
+            Context dictionary with products and stats
+        """
+        context = super().get_context_data(**kwargs)
+        
+        # Get products by status for stats
+        queryset = self.get_queryset()
+        context['new_products'] = queryset.filter(status='N')
+        context['old_products'] = queryset.filter(status='O')
+        context['coming_soon_products'] = queryset.filter(status='C')
+        context['status_filter'] = self.request.GET.get('status', '')
+        
+        # Add sort from request
+        context['sort'] = self.request.GET.get('sort', '-created_at')
+        
+        return context
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

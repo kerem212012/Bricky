@@ -18,7 +18,7 @@
     <div class="container">
         <p class="breadcrumb">
             <a href="{% url 'store:index' %}">Home</a> / 
-            <a href="{% url 'store:category' product.category.slug %}">{{ product.category.title }}</a> / 
+            {% if product.category.slug %}<a href="{% url 'store:category' product.category.slug %}">{{ product.category.title }}</a>{% else %}{{ product.category.title }}{% endif %} / 
             <span>{{ product.name }}</span>
         </p>
     </div>
@@ -309,7 +309,7 @@
             <div class="products-grid">
                 <!-- Related products would be loaded here -->
                 <p class="related-products-link">
-                    <a href="{% url 'store:category' product.category.slug %}">View more {{ product.category.title }} products →</a>
+                    {% if product.category.slug %}<a href="{% url 'store:category' product.category.slug %}">View more {{ product.category.title }} products →</a>{% else %}View more {{ product.category.title }} products{% endif %}
                 </p>
             </div>
         </div>
@@ -321,7 +321,7 @@
             <div class="newsletter-content newsletter-white-content">
                 <h2 class="newsletter-white-title">Don't Miss Out!</h2>
                 <p class="newsletter-subtitle">Get exclusive discounts on new LEGO sets and building tips delivered to your inbox</p>
-                <form class="newsletter-form newsletter-form-container" id="newsletter-form-product" action="{% url 'notifications:newsletter_subscribe_ajax' %}">
+                <form class="newsletter-form newsletter-form-container" id="newsletter-form-product" action="{% url 'notifications:newsletter_subscribe' %}">
                     {% csrf_token %}
                     <input type="email" name="email" placeholder="Enter your email" required class="newsletter-input">
                     <button type="submit" class="btn-primary newsletter-button-white">Subscribe Now</button>
