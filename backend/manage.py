@@ -1,4 +1,3 @@
-\"\"\"Django management utility for Bricky LEGO store.\n\nRun manage.py help for more information.\n\"\"\"\n#!/usr/bin/env python
 import os
 import sys
 

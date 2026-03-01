@@ -18,7 +18,7 @@ class Category(models.Model):
     for visual representation in the catalog.
     """
     id: uuid.UUID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    picture = models.ImageField(blank=True, upload_to="categories", default="user_pictures/default.png")
+    picture = models.ImageField(blank=True, upload_to="categories", default="category/default.png")
     title: str= models.CharField(max_length=200,unique=True,db_index=True)
     slug:str= models.SlugField(unique=True,db_index=True,blank=False,null=False)
 
